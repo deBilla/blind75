@@ -51,6 +51,58 @@ export default function ProblemPage() {
         {p.approach}
       </div>
 
+      {/* Clarify First */}
+      {p.clarifyingQuestions && (
+        <>
+          <div className="section-label">Clarify First</div>
+          <div className="description-box" style={{ borderColor: '#f59e0b33' }}>
+            <ul style={{ margin: 0, paddingLeft: '1.25rem', lineHeight: 1.8 }}>
+              {p.clarifyingQuestions.map((q, i) => (
+                <li key={i} style={{ color: '#cbd5e1' }}>{q}</li>
+              ))}
+            </ul>
+          </div>
+        </>
+      )}
+
+      {/* How to Explain Your Approach */}
+      {p.approachWalkthrough && (
+        <>
+          <div className="section-label">How to Explain Your Approach</div>
+          <div className="insight-box" style={{ borderLeft: '3px solid #6366f1', background: 'rgba(99,102,241,0.07)' }}>
+            {p.approachWalkthrough}
+          </div>
+        </>
+      )}
+
+      {/* Code Quality */}
+      {p.codeQuality && (
+        <>
+          <div className="section-label">Code Quality</div>
+          <div className="description-box" style={{ borderColor: '#22c55e33' }}>
+            <ul style={{ margin: 0, paddingLeft: '1.25rem', lineHeight: 1.8 }}>
+              {p.codeQuality.map((tip, i) => (
+                <li key={i} style={{ color: '#cbd5e1' }}>{tip}</li>
+              ))}
+            </ul>
+          </div>
+        </>
+      )}
+
+      {/* If You Get Stuck */}
+      {p.gettingUnstuck && (
+        <>
+          <div className="section-label">If You Get Stuck</div>
+          <div className="description-box" style={{ borderColor: '#ec489933' }}>
+            <ol style={{ margin: 0, paddingLeft: '1.25rem', lineHeight: 1.8 }}>
+              {p.gettingUnstuck.map((step, i) => (
+                <li key={i} style={{ color: '#cbd5e1' }}>{step}</li>
+              ))}
+            </ol>
+          </div>
+        </>
+      )}
+
       {/* Animated visual (if available for this problem) */}
       <ProblemVisual problemId={id} />
 
@@ -69,6 +121,16 @@ export default function ProblemPage() {
       {/* Solution */}
       <div className="section-label">Solution</div>
       <CodeBlock code={p.solution} lang="Python" testCode={p.testCode} />
+
+      {/* Complexity Breakdown */}
+      {p.complexityBreakdown && (
+        <>
+          <div className="section-label">Complexity Breakdown</div>
+          <div className="description-box" style={{ borderColor: '#a78bfa33' }}>
+            {p.complexityBreakdown}
+          </div>
+        </>
+      )}
 
       {/* Complexity summary */}
       <div style={{

@@ -156,6 +156,23 @@ export const problems = {
 print(containsDuplicate([1, 2, 3, 4]))   # False
 print(containsDuplicate([1]))            # False`,
     time: 'O(n)', space: 'O(n)',
+    clarifyingQuestions: [
+      'Can the array be empty? (return false)',
+      'Any constraints on value range?',
+      'Should I return true/false or the duplicate element itself?',
+    ],
+    approachWalkthrough: 'I\'d use a hash set to track seen values. I iterate through nums — if the current element is already in the set, I return true immediately. Otherwise I add it. This avoids O(n²) brute-force by trading a bit of space for O(1) lookups.',
+    codeQuality: [
+      'Name the set `seen` — makes intent self-documenting',
+      'Return early on first duplicate, no need to process the rest',
+      'One loop, one set, one clear responsibility',
+    ],
+    gettingUnstuck: [
+      'Start with brute force: compare every pair — O(n²)',
+      'Ask: what data structure gives O(1) membership check?',
+      'Trace manually: [1,2,3,1] — when do you first see a repeat?',
+    ],
+    complexityBreakdown: 'Time O(n): one pass through the array; each set lookup and insert is O(1). Space O(n): worst case (no duplicates) the set holds every element.',
   },
   'valid-anagram': {
     id: 'valid-anagram', title: 'Valid Anagram', number: 242,
@@ -181,6 +198,23 @@ print(containsDuplicate([1]))            # False`,
 print(isAnagram("rat", "car"))          # False
 print(isAnagram("a", "a"))              # True`,
     time: 'O(n)', space: 'O(1) — at most 26 chars',
+    clarifyingQuestions: [
+      'Can the strings contain non-ASCII characters or just lowercase letters?',
+      'Are they guaranteed the same length? (different lengths → false immediately)',
+      'Is the comparison case-sensitive?',
+    ],
+    approachWalkthrough: 'I\'d count character frequencies using one map. Increment for each char in s, decrement for each char in t. Any non-zero count means they\'re not anagrams. Short-circuit if lengths differ.',
+    codeQuality: [
+      'Check `len(s) != len(t)` first — cheap early exit',
+      'One dict: increment for s, decrement for t',
+      'Use `count.get(c, 0)` rather than try/except for missing keys',
+    ],
+    gettingUnstuck: [
+      'What defines an anagram? Same characters, same frequencies.',
+      'Could I sort both strings and compare? O(n log n) — valid brute force.',
+      'Hash map: count chars in s, subtract chars in t — O(n) time.',
+    ],
+    complexityBreakdown: 'Time O(n): two passes over strings of length n. Space O(1): the frequency map has at most 26 lowercase letter keys regardless of input size.',
   },
   'two-sum': {
     id: 'two-sum', title: 'Two Sum', number: 1,
@@ -203,6 +237,24 @@ print(isAnagram("a", "a"))              # True`,
 print(twoSum([3, 2, 4], 6))        # [1, 2]
 print(twoSum([3, 3], 6))           # [0, 1]`,
     time: 'O(n)', space: 'O(n)',
+    clarifyingQuestions: [
+      'Will there always be exactly one valid solution?',
+      'Can I use the same element twice? (problem says no)',
+      'Can nums contain negatives or zeros?',
+      'Should I return indices or values?',
+    ],
+    approachWalkthrough: 'I\'d use a hash map from value to index. For each number, I compute complement = target - current. If the complement is already in the map, I\'ve found my pair and return both indices. Otherwise I store the current number.',
+    codeQuality: [
+      'Name the map `seen` — value→index, self-documenting',
+      'Compute `complement = target - n` as a named variable',
+      'No nested loops — the map is the "search by complement" mechanism',
+    ],
+    gettingUnstuck: [
+      'Brute force: try every pair — O(n²). Name this first.',
+      'Optimization: for each n, what do I need to already know? target - n.',
+      'Hash map lets me check "have I seen target-n before?" in O(1).',
+    ],
+    complexityBreakdown: 'Time O(n): one pass; each hash map lookup and insert is O(1). Space O(n): worst case we store n-1 values before finding the answer.',
   },
   'group-anagrams': {
     id: 'group-anagrams', title: 'Group Anagrams', number: 49,
@@ -227,6 +279,23 @@ def groupAnagrams(strs):
 for group in sorted(result, key=lambda x: sorted(x)[0]):
     print(sorted(group))`,
     time: 'O(n·k·log k)', space: 'O(n·k)',
+    clarifyingQuestions: [
+      'Can the input contain empty strings? (empty string is an anagram of itself)',
+      'Are strings guaranteed lowercase letters only?',
+      'Does the output order of groups matter?',
+    ],
+    approachWalkthrough: 'I\'d sort each word\'s characters to get a canonical key — all anagrams share the same sorted form. Use a hash map from sorted-key to list of original words. One pass, insert each word under its key.',
+    codeQuality: [
+      'Use `tuple(sorted(word))` as the key — tuples are hashable, lists are not',
+      '`defaultdict(list)` avoids an explicit key-exists check',
+      'Expressive: "group words by their sorted form" reads like the algorithm itself',
+    ],
+    gettingUnstuck: [
+      'What property do all anagrams share? Same character frequencies.',
+      'How do you canonicalize that? Sort the characters.',
+      'What if sorting is too slow? A 26-count tuple is also a valid O(k) key.',
+    ],
+    complexityBreakdown: 'Time O(n·k·log k): for each of n words, sorting takes O(k log k) where k is word length. Space O(n·k): storing all n words grouped by key.',
   },
   'top-k-frequent': {
     id: 'top-k-frequent', title: 'Top K Frequent Elements', number: 347,
@@ -256,6 +325,23 @@ for group in sorted(result, key=lambda x: sorted(x)[0]):
     testCode: `print(sorted(topKFrequent([1,1,1,2,2,3], 2)))  # [1, 2]
 print(topKFrequent([1], 1))                        # [1]`,
     time: 'O(n)', space: 'O(n)',
+    clarifyingQuestions: [
+      'Is k guaranteed to be ≤ number of unique elements?',
+      'Can there be ties in frequency? (problem guarantees a unique answer)',
+      'Must results be in any particular order?',
+    ],
+    approachWalkthrough: 'I\'d use bucket sort by frequency. Count frequencies with a hash map, then create n+1 buckets indexed by frequency. Scan from the highest bucket down, collecting elements until I have k. This avoids a heap and runs in O(n).',
+    codeQuality: [
+      'Bucket array length is len(nums)+1 — index directly maps to frequency',
+      'Scan buckets from the end to get highest-frequency first',
+      'No heap needed — bucket sort leverages the bounded frequency range',
+    ],
+    gettingUnstuck: [
+      'Naive: count frequencies then sort by frequency — O(n log n). Valid starting point.',
+      'Can we do better? Frequency is bounded by n, so bucket sort works.',
+      'Heap approach: push all (freq, num) pairs, pop k — O(n log k). Also valid.',
+    ],
+    complexityBreakdown: 'Time O(n): frequency counting is O(n), building n+1 buckets is O(n), scanning buckets is O(n). Space O(n): count map and bucket array both hold at most n entries.',
   },
   'product-except-self': {
     id: 'product-except-self', title: 'Product of Array Except Self', number: 238,
@@ -287,6 +373,23 @@ print(topKFrequent([1], 1))                        # [1]`,
     testCode: `print(productExceptSelf([1,2,3,4]))   # [24, 12, 8, 6]
 print(productExceptSelf([-1,1,0,-3,3]))# [0, 0, 9, 0, 0]`,
     time: 'O(n)', space: 'O(1) output array not counted',
+    clarifyingQuestions: [
+      'Can the array contain zeros? (yes, zeros affect output)',
+      'Can I use division? (problem says no)',
+      'Is the output array counted toward space complexity? (typically no)',
+    ],
+    approachWalkthrough: 'Two passes on the output array. First pass left-to-right: fill prefix products. Second pass right-to-left: multiply each position by a running suffix product. Output[i] = prefix[i] × suffix[i] without ever dividing.',
+    codeQuality: [
+      'Use the output array itself for prefix — avoids an extra O(n) array',
+      'Use a running `suffix` variable in the second pass — no extra array',
+      'Name the running variables clearly: `prefix` and `suffix` communicate intent',
+    ],
+    gettingUnstuck: [
+      'output[i] = (product of everything left of i) × (product of everything right of i)',
+      'Can I compute left products in one pass? Yes — running product left to right.',
+      'Can I compute right products without storing all of them? Yes — running product right to left.',
+    ],
+    complexityBreakdown: 'Time O(n): two linear passes. Space O(1) excluding the output array: only two scalar running variables (prefix and suffix), no auxiliary arrays.',
   },
   'longest-consecutive': {
     id: 'longest-consecutive', title: 'Longest Consecutive Sequence', number: 128,
@@ -313,6 +416,23 @@ print(productExceptSelf([-1,1,0,-3,3]))# [0, 0, 9, 0, 0]`,
     testCode: `print(longestConsecutive([100,4,200,1,3,2]))  # 4  (1,2,3,4)
 print(longestConsecutive([0,3,7,2,5,8,4,6,0,1]))# 9`,
     time: 'O(n)', space: 'O(n)',
+    clarifyingQuestions: [
+      'Are there duplicates in the array? (handle by converting to set)',
+      'Can the array be empty? (return 0)',
+      'Must it be O(n)? (yes, the problem specifies this)',
+    ],
+    approachWalkthrough: 'Convert nums to a set for O(1) lookup. For each number, only start counting a sequence if num-1 is NOT in the set — that ensures I only process from the true start, preventing O(n²) redundant counting.',
+    codeQuality: [
+      'Convert to set first — all subsequent lookups are O(1)',
+      'The `if n-1 not in num_set` guard is the key optimization — state it explicitly in an interview',
+      'Use a `while` loop for counting, `best = max(best, length)` to track the answer',
+    ],
+    gettingUnstuck: [
+      'Brute force: sort and scan — O(n log n). Valid but not O(n).',
+      'Why does O(n) need a set? To check "is this a sequence start?" in O(1).',
+      'Each number is visited at most twice across all sequence counts — total is O(n).',
+    ],
+    complexityBreakdown: 'Time O(n): building the set is O(n). Each element starts at most one sequence and the inner while loop is bounded by n total steps across all iterations. Space O(n): the set holds all elements.',
   },
 
   // ─── TWO POINTERS ─────────────────────────────────────────────────────────
@@ -341,6 +461,23 @@ print(longestConsecutive([0,3,7,2,5,8,4,6,0,1]))# 9`,
 print(isPalindrome("race a car"))                       # False
 print(isPalindrome(" "))                                # True`,
     time: 'O(n)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Should I ignore case? (yes)',
+      'Should I ignore non-alphanumeric characters? (yes)',
+      'Is an empty string considered a palindrome? (yes)',
+    ],
+    approachWalkthrough: 'Two pointers starting at each end. Skip non-alphanumeric on both sides. Compare lowercased characters — if mismatch, return false. If pointers cross without mismatch, it\'s a palindrome.',
+    codeQuality: [
+      'Inner `while` loops skip non-alphanumeric cleanly — don\'t mix that logic into the comparison',
+      'Use `.isalnum()` and `.lower()` — clear built-in methods',
+      'No string cleaning step needed — skip on the fly for O(1) space',
+    ],
+    gettingUnstuck: [
+      'Simplest: strip non-alphanumeric, lowercase, compare s == s[::-1] — O(n) space',
+      'Two-pointer version avoids creating a cleaned string — O(1) space',
+      'What does "valid palindrome" mean precisely? Same forward and backward after filtering.',
+    ],
+    complexityBreakdown: 'Time O(n): each character is visited at most once per pointer. Space O(1): no cleaned copy of the string is made — we work in-place with index variables.',
   },
   'three-sum': {
     id: 'three-sum', title: '3Sum', number: 15,
@@ -374,6 +511,24 @@ print(isPalindrome(" "))                                # True`,
 print(threeSum([0,1,1]))           # []
 print(threeSum([0,0,0]))           # [[0,0,0]]`,
     time: 'O(n²)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Can the array contain duplicates? (yes — need to skip them)',
+      'Must output triplets be unique? (yes)',
+      'What\'s expected for fewer than 3 elements? (return [])',
+      'Are the triplets required to be sorted? (any order within each triplet is fine)',
+    ],
+    approachWalkthrough: 'Sort first — enables two-pointer and duplicate skipping. Fix the first element at i, then use left/right pointers on the rest to find pairs summing to -nums[i]. After adding a triplet, skip duplicate values on both pointers.',
+    codeQuality: [
+      'Sorting is essential — enables two-pointer and clean duplicate skipping',
+      'Skip duplicate i values: `if i > 0 and nums[i] == nums[i-1]: continue`',
+      'After adding a triplet, advance both pointers past duplicates',
+    ],
+    gettingUnstuck: [
+      'Think of it as: fix one number, then it becomes 2Sum on the remainder.',
+      'Sorting enables two-pointer — without it you can\'t efficiently skip duplicates.',
+      'Tricky part is duplicate handling — trace through [0,0,0,0] carefully.',
+    ],
+    complexityBreakdown: 'Time O(n²): sorting is O(n log n), then O(n) outer loop × O(n) two-pointer inner loop = O(n²) dominates. Space O(1) excluding output: sort in-place, no extra data structures.',
   },
   'container-with-water': {
     id: 'container-with-water', title: 'Container With Most Water', number: 11,
@@ -399,6 +554,23 @@ print(threeSum([0,0,0]))           # [[0,0,0]]`,
     testCode: `print(maxArea([1,8,6,2,5,4,8,3,7]))  # 49
 print(maxArea([1,1]))                 # 1`,
     time: 'O(n)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Can heights be zero? (yes)',
+      'Is there always at least two lines? (yes)',
+      'Are we maximizing 2D cross-section area? (yes)',
+    ],
+    approachWalkthrough: 'Start with widest container — pointers at both ends. Area = min(height[l], height[r]) × width. Width only decreases as we converge, so the only way to improve is to find a taller height — move the shorter pointer inward.',
+    codeQuality: [
+      'The greedy insight must be stated: move the SHORTER pointer — it\'s the only chance to improve',
+      '`area = min(height[l], height[r]) * (r - l)` reads exactly like the formula',
+      'No helper functions needed — one while loop captures everything',
+    ],
+    gettingUnstuck: [
+      'Brute force: try all pairs — O(n²). Name this first.',
+      'Key insight: moving the taller pointer inward can\'t help — the shorter side still limits us AND width decreases.',
+      'Therefore: always move the shorter pointer. This greedy choice is safe.',
+    ],
+    complexityBreakdown: 'Time O(n): each pointer moves inward at most n/2 times, meeting in the middle. Space O(1): only two pointers and a running maximum.',
   },
   'trapping-rain-water': {
     id: 'trapping-rain-water', title: 'Trapping Rain Water', number: 42,
@@ -427,6 +599,23 @@ print(maxArea([1,1]))                 # 1`,
     testCode: `print(trap([0,1,0,2,1,0,1,3,2,1,2,1]))  # 6
 print(trap([4,2,0,3,2,5]))               # 9`,
     time: 'O(n)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Can heights be zero? (yes)',
+      'What is the water at the boundary positions? (always 0)',
+      'Is the input guaranteed to have at least 2 elements?',
+    ],
+    approachWalkthrough: 'Water at any position i = min(maxLeft, maxRight) - height[i]. I use two pointers and process the side with the smaller maximum first — that side is the bottleneck, so I can safely compute water there without knowing the full other side.',
+    codeQuality: [
+      'Process the side with smaller max — eliminates the need for precomputed arrays',
+      'Update maxL/maxR BEFORE computing water at the new position',
+      '`maxL <= maxR` determines which side is the limiting constraint',
+    ],
+    gettingUnstuck: [
+      'Convince yourself: water[i] = min(maxLeft[i], maxRight[i]) - height[i]',
+      'Precomputed arrays: two passes then a third to compute water — O(n) space',
+      'Two-pointer: process the bottleneck side — which side has the smaller max?',
+    ],
+    complexityBreakdown: 'Time O(n): each element is processed exactly once as a pointer moves inward. Space O(1): only maxL, maxR, and two pointer indices — no precomputed arrays.',
   },
 
   // ─── SLIDING WINDOW ───────────────────────────────────────────────────────
@@ -453,6 +642,23 @@ print(trap([4,2,0,3,2,5]))               # 9`,
 print(maxProfit([7, 6, 4, 3, 1]))       # 0  (prices only fall)
 print(maxProfit([1, 2]))                # 1`,
     time: 'O(n)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Can I make multiple transactions? (no — at most one buy and one sell)',
+      'What if prices always decrease? (return 0, no profit possible)',
+      'Can prices be negative? (no — they represent stock prices)',
+    ],
+    approachWalkthrough: 'I track the minimum price seen so far. At each price, potential profit = price - minPrice. Update maxProfit if better. This is: "if I had bought at the lowest price before today, what would my profit be?"',
+    codeQuality: [
+      'Two variables only: `minPrice` and `maxProfit`',
+      'Update min first, then check profit — order matters',
+      'Initialize `minPrice = float(\'inf\')` — handles any first element cleanly',
+    ],
+    gettingUnstuck: [
+      'At each price: what\'s the best I could have bought for before this? The running minimum.',
+      'Profit today = today\'s price - running minimum.',
+      'Update max profit at each step.',
+    ],
+    complexityBreakdown: 'Time O(n): one pass through prices. Space O(1): only two scalar variables regardless of input size.',
   },
   'longest-substring-no-repeat': {
     id: 'longest-substring-no-repeat', title: 'Longest Substring Without Repeating Characters', number: 3,
@@ -479,6 +685,23 @@ print(maxProfit([1, 2]))                # 1`,
 print(lengthOfLongestSubstring("bbbbb"))     # 1  ("b")
 print(lengthOfLongestSubstring("pwwkew"))    # 3  ("wke")`,
     time: 'O(n)', space: 'O(min(n,alphabet))',
+    clarifyingQuestions: [
+      'Does "repeating" mean exact character match? (yes)',
+      'Can the string contain spaces or special characters? (yes)',
+      'Is an empty string valid? (return 0)',
+    ],
+    approachWalkthrough: 'Sliding window with a set. Expand right one char at a time. If s[r] is already in the window, shrink from the left until the duplicate is removed. Track maximum window size throughout.',
+    codeQuality: [
+      'Set tracks which characters are currently in the window',
+      'Shrink by removing s[l] and advancing l — explicit and clear',
+      '`best = max(best, r - l + 1)` after adding s[r] gives the current window size',
+    ],
+    gettingUnstuck: [
+      'Brute force: check every substring — O(n² or n³). State this.',
+      'Sliding window: can we avoid re-scanning? Shrink only when we must.',
+      'When does the window become invalid? When s[r] is already in the window set.',
+    ],
+    complexityBreakdown: 'Time O(n): each character is added and removed from the set at most once. Space O(min(n, alphabet)): the set holds at most the unique chars in the window — bounded by alphabet size.',
   },
   'longest-repeating-replacement': {
     id: 'longest-repeating-replacement', title: 'Longest Repeating Character Replacement', number: 424,
@@ -506,6 +729,23 @@ print(lengthOfLongestSubstring("pwwkew"))    # 3  ("wke")`,
     testCode: `print(characterReplacement("ABAB", 2))    # 4
 print(characterReplacement("AABABBA", 1))  # 4`,
     time: 'O(n)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Can we replace any character, not just minority ones? (yes)',
+      'What is k? (number of replacements allowed)',
+      'Is the string uppercase only? (as per constraints, yes)',
+    ],
+    approachWalkthrough: 'Sliding window where the invariant is (window_size - count_of_most_frequent_char) ≤ k. If the window becomes invalid, I slide it by incrementing l by 1 — I never shrink it, just slide forward.',
+    codeQuality: [
+      '`maxFreq` never needs to decrease — we only care about the largest window ever seen',
+      '"Slide, don\'t shrink" optimization is the non-obvious part — worth explaining aloud',
+      'Count map tracks frequencies in the current window',
+    ],
+    gettingUnstuck: [
+      'Brute force: try all substrings, check validity — O(n³)',
+      'What makes a window valid? We can make all chars the same by replacing (size - most_frequent) chars.',
+      'We want that replacement count ≤ k. Slide when it exceeds k.',
+    ],
+    complexityBreakdown: 'Time O(n): right pointer advances n times, left pointer advances at most n times total — O(2n) = O(n). Space O(1): the count map has at most 26 keys for uppercase letters.',
   },
   'minimum-window-substring': {
     id: 'minimum-window-substring', title: 'Minimum Window Substring', number: 76,
@@ -542,6 +782,23 @@ print(characterReplacement("AABABBA", 1))  # 4`,
 print(minWindow("a", "a"))              # "a"
 print(minWindow("a", "aa"))             # ""`,
     time: 'O(n+m)', space: 'O(m)',
+    clarifyingQuestions: [
+      'Can t have repeated characters? (yes — you need that many in the window)',
+      'Is there always a valid window? (not necessarily — return "" if not)',
+      'Can s or t be empty? (handle edge case)',
+    ],
+    approachWalkthrough: 'Two frequency maps: `need` for t, `window` for current window. Track `have` (chars satisfying their count) vs `required` (total distinct chars needed). Expand right until satisfied, then shrink left to minimize.',
+    codeQuality: [
+      'Track `have` vs `required` as integers — avoids re-scanning the map each step',
+      'Increment `have` only when `window[c] == need[c]`, not just ≥',
+      'Store result as `[l, r]` indices — slice at the end',
+    ],
+    gettingUnstuck: [
+      'Core loop: expand until all of t is covered. Then shrink from left as much as possible.',
+      'How to know when all of t is covered? Track "have" and "required" as counts.',
+      'Edge: t contains repeated chars — window[c] must reach need[c], not just > 0.',
+    ],
+    complexityBreakdown: 'Time O(n+m): building `need` is O(m); each char in s is added and removed from `window` at most once — O(2n). Space O(m): need and window maps hold at most the unique chars of t.',
   },
 
   // ─── STACK ────────────────────────────────────────────────────────────────
@@ -573,6 +830,23 @@ print(isValid("(]"))        # False
 print(isValid("([)]"))      # False
 print(isValid("{[]}"))      # True`,
     time: 'O(n)', space: 'O(n)',
+    clarifyingQuestions: [
+      'What bracket types are included? ([], {}, ())',
+      'Can the string contain non-bracket characters? (no, per constraints)',
+      'Is an empty string valid? (yes)',
+    ],
+    approachWalkthrough: 'I use a stack. For each open bracket I push it. For each close bracket I check if the top of the stack is the matching open bracket — if not, it\'s invalid. At the end, the stack must be empty.',
+    codeQuality: [
+      'Use a dict `{")": "(", "]": "[", "}": "{"}` to look up matching pairs',
+      'Check `not stack` before popping — handles close bracket with empty stack',
+      'Return `len(stack) == 0` — handles unmatched open brackets at the end',
+    ],
+    gettingUnstuck: [
+      'What needs to be remembered? The most recent unmatched open bracket.',
+      'LIFO order — that\'s a stack.',
+      'Edge: `([)]` looks balanced but is invalid — the close must match the MOST RECENT open.',
+    ],
+    complexityBreakdown: 'Time O(n): one pass through the string; each character is pushed or popped at most once. Space O(n): worst case (all open brackets) the stack holds n elements.',
   },
   'min-stack': {
     id: 'min-stack', title: 'Min Stack', number: 155,
@@ -611,6 +885,23 @@ ms.pop()
 print(ms.top())     # 0
 print(ms.getMin())  # -3`,
     time: 'O(1) all ops', space: 'O(n)',
+    clarifyingQuestions: [
+      'Is getMin O(1) required? (yes, per problem statement)',
+      'Can the stack be empty when getMin is called? (no, per constraints)',
+      'What values can be pushed? (any integer, including negatives)',
+    ],
+    approachWalkthrough: 'Two synchronized stacks: main stack and minStack. minStack[i] stores the minimum of all elements at and below index i. When I push, I push to both. When I pop, I pop from both. getMin peeks the minStack top.',
+    codeQuality: [
+      'Two synchronized stacks — they always have the same size',
+      'minStack push: `min(new_val, minStack[-1])` — push the new minimum, not the raw value',
+      'All four operations are truly O(1) — direct array ops, no scanning',
+    ],
+    gettingUnstuck: [
+      'Why can\'t a single min variable work? After a pop, the min might change.',
+      'We need to know the min at EVERY stack state. What stores state history? A stack.',
+      'Sync both stacks: every push and pop affects both together.',
+    ],
+    complexityBreakdown: 'Time O(1) for all operations: push, pop, top, and getMin are direct array operations. Space O(n): two stacks each holding at most n elements.',
   },
   'daily-temperatures': {
     id: 'daily-temperatures', title: 'Daily Temperatures', number: 739,
@@ -636,6 +927,23 @@ print(ms.getMin())  # -3`,
 print(dailyTemperatures([30,40,50,60]))               # [1,1,1,0]
 print(dailyTemperatures([30,60,90]))                  # [1,1,0]`,
     time: 'O(n)', space: 'O(n)',
+    clarifyingQuestions: [
+      'What if no future day is warmer? (answer[i] = 0)',
+      'Is the array guaranteed non-empty?',
+      'Are temperatures integers? (yes)',
+    ],
+    approachWalkthrough: 'Monotonic decreasing stack of (temperature, index) pairs. For each day, while the current temp is warmer than the stack top, pop and record the wait as current_index - popped_index. Then push the current day.',
+    codeQuality: [
+      'Stack stores (temp, index) tuples — index is needed to compute day difference',
+      'The while loop processes all resolved "waiting" days before pushing the current one',
+      'Result array initialized to 0 — no need to handle "never warmer" separately',
+    ],
+    gettingUnstuck: [
+      'Brute force: for each day, scan forward until warmer — O(n²)',
+      'What are we waiting for? A warmer day. A stack of "pending" days works.',
+      'When is a pending day resolved? When a warmer temperature arrives.',
+    ],
+    complexityBreakdown: 'Time O(n): each index is pushed and popped at most once — amortized O(1) per element. Space O(n): worst case (decreasing temperatures) all indices are on the stack.',
   },
   'evaluate-rpn': {
     id: 'evaluate-rpn', title: 'Evaluate Reverse Polish Notation', number: 150,
@@ -664,6 +972,23 @@ print(dailyTemperatures([30,60,90]))                  # [1,1,0]`,
 print(evalRPN(["4","13","5","/","+"]))         # 6
 print(evalRPN(["10","6","9","3","+","-11","*","/","*","17","+","5","+"]))  # 22`,
     time: 'O(n)', space: 'O(n)',
+    clarifyingQuestions: [
+      'Can the result overflow a 32-bit integer? (assume 64-bit is fine)',
+      'Is division truncated toward zero? (yes, per problem)',
+      'Can the input be invalid? (assume always valid RPN)',
+    ],
+    approachWalkthrough: 'Iterate tokens. Numbers go onto the stack. When an operator arrives, pop two operands (b first, then a — order matters for subtraction and division), compute a op b, push result. Final answer is the only remaining element.',
+    codeQuality: [
+      'Pop in order `b, a = stack.pop(), stack.pop()` — b is right operand, a is left',
+      'Use `int(a / b)` for truncation toward zero in Python (not `a // b` which floors)',
+      'Simple if/elif for four operators is clearer than a lambda dict',
+    ],
+    gettingUnstuck: [
+      'Classic stack: numbers push, operators consume two and push one result.',
+      'Order of operands matters: first pop is the RIGHT operand (b), second is LEFT (a).',
+      'Trace: ["2","1","+"] → push 2, push 1, "+" pops → 2+1=3, push 3.',
+    ],
+    complexityBreakdown: 'Time O(n): one pass through tokens, each push/pop is O(1). Space O(n): worst case (all numbers, no operators) the stack holds n elements.',
   },
   'generate-parentheses': {
     id: 'generate-parentheses', title: 'Generate Parentheses', number: 22,
@@ -691,6 +1016,23 @@ print(evalRPN(["10","6","9","3","+","-11","*","/","*","17","+","5","+"]))  # 22`
 print(generateParenthesis(3))  # ['((()))','(()())','(())()','()(())','()()()']
 print(len(generateParenthesis(4)))  # 14`,
     time: 'O(4ⁿ/√n)', space: 'O(n)',
+    clarifyingQuestions: [
+      'Should the output be sorted? (any order is fine)',
+      'Is n always positive? (yes, per constraints)',
+      'What\'s expected for n=1? (just ["()"])',
+    ],
+    approachWalkthrough: 'Backtracking. At each step I can add "(" if open < n, or ")" if close < open. Recursively build the string until length equals 2n. These constraints generate only valid combinations — no filtering needed.',
+    codeQuality: [
+      'Track `open` and `close` counts — cleaner than tracking string length for constraints',
+      'Two clear rules: add "(" when open < n, add ")" when close < open',
+      '`result.append(s)` only at the base case (length == 2n)',
+    ],
+    gettingUnstuck: [
+      'Generate all combinations of n "(" and n ")" with constraints.',
+      'Constraint 1: never add ")" if there\'s no unmatched "(" (close < open)',
+      'Constraint 2: never add more than n of either type',
+    ],
+    complexityBreakdown: 'Time O(4ⁿ/√n): the number of valid combinations is the nth Catalan number. Space O(n): recursion stack depth is at most 2n.',
   },
   'largest-rectangle-histogram': {
     id: 'largest-rectangle-histogram', title: 'Largest Rectangle in Histogram', number: 84,
@@ -718,6 +1060,23 @@ print(len(generateParenthesis(4)))  # 14`,
     testCode: `print(largestRectangleArea([2,1,5,6,2,3]))  # 10
 print(largestRectangleArea([2,4]))           # 4`,
     time: 'O(n)', space: 'O(n)',
+    clarifyingQuestions: [
+      'Are heights guaranteed non-negative?',
+      'Can all heights be zero? (result would be 0)',
+      'Is the width of each bar exactly 1?',
+    ],
+    approachWalkthrough: 'Monotonic increasing stack of (index, height). When a bar shorter than the stack top arrives, pop taller bars and compute their max rectangle. The popped bar\'s rectangle extends left to where it was inserted, and right to the current position.',
+    codeQuality: [
+      'Stack stores (start_index, height) — start_index tracks how far left the rectangle can extend',
+      'When popping, the current bar\'s start can be pulled back to the popped bar\'s index',
+      'After the main loop, process remaining stack bars extending to the end of the array',
+    ],
+    gettingUnstuck: [
+      'Brute force: for each pair of bars, compute the rectangle — O(n²)',
+      'For each bar as the shortest, how far can it extend left and right?',
+      'Stack maintains "which bars are still potentially useful" in increasing height order.',
+    ],
+    complexityBreakdown: 'Time O(n): each bar is pushed and popped at most once — O(2n) total. Space O(n): the stack holds up to n bars in the worst case (monotonically increasing heights).',
   },
 
   // ─── BINARY SEARCH ────────────────────────────────────────────────────────
@@ -745,6 +1104,23 @@ print(largestRectangleArea([2,4]))           # 4`,
     testCode: `print(search([-1,0,3,5,9,12], 9))   # 4
 print(search([-1,0,3,5,9,12], 2))   # -1`,
     time: 'O(log n)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Is the array sorted? (yes, per problem)',
+      'Are there duplicates? (no, per constraints)',
+      'What to return if not found? (-1)',
+    ],
+    approachWalkthrough: 'Set l=0, r=n-1. Compute mid=(l+r)//2 and compare nums[mid] to target. If too small, search right half (l=mid+1). If too large, search left half (r=mid-1). Stop when l > r.',
+    codeQuality: [
+      'Loop condition `l <= r` (not `l < r`) to handle single-element arrays',
+      'Three-way comparison: equal, less than, greater than — each case clear',
+      'In C++/Java: use `l + (r-l)//2` to avoid overflow; fine in Python',
+    ],
+    gettingUnstuck: [
+      'Off-by-one errors come from `l < r` vs `l <= r` and `mid` vs `mid±1`',
+      'Trace through a 3-element array to check your boundaries: [1,2,3], target=3',
+      'Invariant: target is always in [l, r] if it exists',
+    ],
+    complexityBreakdown: 'Time O(log n): search space halves each step — at most log₂(n) iterations. Space O(1): only l, r, and mid — iterative, no recursion.',
   },
   'find-min-rotated': {
     id: 'find-min-rotated', title: 'Find Minimum in Rotated Sorted Array', number: 153,
@@ -770,6 +1146,23 @@ print(search([-1,0,3,5,9,12], 2))   # -1`,
 print(findMin([4,5,6,7,0,1,2]))  # 0
 print(findMin([11,13,15,17]))    # 11`,
     time: 'O(log n)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Are there duplicates? (no for this version — with duplicates is a harder variant)',
+      'How many times was it rotated? (unknown — could be 0 to n times)',
+      'Is the array guaranteed non-empty?',
+    ],
+    approachWalkthrough: 'Binary search. If nums[mid] > nums[r], the minimum is in the right half — the left side is sorted and all values are larger. Otherwise the minimum is in the left half including mid. Converge until l == r.',
+    codeQuality: [
+      'Compare mid to RIGHT boundary — this is the key non-obvious choice',
+      'Use `r = mid` (not `mid-1`) when going left — mid might be the minimum',
+      'Loop condition `l < r`; return `nums[l]` at the end',
+    ],
+    gettingUnstuck: [
+      'Draw a rotation: a sorted array with a "dip" somewhere. The minimum is at the dip.',
+      'Which half contains the dip? If nums[mid] > nums[r], the dip is in the right half.',
+      'Compare to nums[r], not nums[l] — avoids ambiguity at the midpoint.',
+    ],
+    complexityBreakdown: 'Time O(log n): search space halves each step. Space O(1): two pointers, no recursion.',
   },
   'search-rotated': {
     id: 'search-rotated', title: 'Search in Rotated Sorted Array', number: 33,
@@ -801,6 +1194,23 @@ print(findMin([11,13,15,17]))    # 11`,
 print(searchRotated([4,5,6,7,0,1,2], 3))  # -1
 print(searchRotated([1], 0))              # -1`,
     time: 'O(log n)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Are there duplicates? (no for this version — with duplicates it\'s harder)',
+      'What if target is not in the array? (return -1)',
+      'Is the array guaranteed non-empty?',
+    ],
+    approachWalkthrough: 'At each midpoint, one half is always sorted. I check which half by comparing nums[l] to nums[mid]. If target falls in the sorted half, search there. Otherwise search the unsorted half.',
+    codeQuality: [
+      '`nums[l] <= nums[mid]` identifies whether the left half is sorted',
+      'Then `nums[l] <= target < nums[mid]` checks if target is in that sorted range',
+      'Symmetric logic for the right half — two clean if/else branches',
+    ],
+    gettingUnstuck: [
+      'Key insight: in a rotated array, one half is ALWAYS fully sorted.',
+      'If target is in the sorted half, standard binary search there.',
+      'Otherwise it must be in the other half — recurse there.',
+    ],
+    complexityBreakdown: 'Time O(log n): search space halves each step, just like regular binary search. Space O(1): iterative with two pointers.',
   },
   'koko-bananas': {
     id: 'koko-bananas', title: 'Koko Eating Bananas', number: 875,
@@ -828,6 +1238,23 @@ def minEatingSpeed(piles, h):
 print(minEatingSpeed([30,11,23,4,20], 5))  # 30
 print(minEatingSpeed([30,11,23,4,20], 6))  # 23`,
     time: 'O(n log m)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Is there always a valid speed that works? (yes — max(piles) always works)',
+      'Can h be less than the number of piles? (no — need at least 1 hour per pile)',
+      'What\'s the minimum possible speed? (1)',
+    ],
+    approachWalkthrough: 'Binary search on the answer space (speed 1 to max(piles)). For each candidate speed k, total_hours = sum of ceil(pile/k). If total ≤ h, k works — try slower. Otherwise try faster.',
+    codeQuality: [
+      '`math.ceil(p / k)` for each pile, `sum(...)` for total — clear and direct',
+      'Search for the LEFT boundary: smallest k where total_hours ≤ h',
+      'Use `r = mid` (not `mid-1`) when feasible — mid itself might be the answer',
+    ],
+    gettingUnstuck: [
+      'This is "binary search on the answer" — recognize the pattern.',
+      'Is there a monotonic relationship? Yes — faster speed = fewer hours.',
+      'Find the smallest speed where total_hours ≤ h.',
+    ],
+    complexityBreakdown: 'Time O(n log m): binary search over m = max(piles) speeds; each feasibility check scans n piles. Space O(1): no extra data structures.',
   },
 
   // ─── LINKED LIST ──────────────────────────────────────────────────────────
@@ -864,6 +1291,23 @@ print(toL(reverseList(L([1,2,3,4,5]))))  # [5,4,3,2,1]
 print(toL(reverseList(L([1,2]))))         # [2,1]
 print(toL(reverseList(None)))             # []`,
     time: 'O(n)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Is it singly or doubly linked? (singly)',
+      'Should I reverse in-place or return a new list? (in-place, return new head)',
+      'What\'s the result for empty list or single node?',
+    ],
+    approachWalkthrough: 'Three pointers: prev (starts as None), curr (starts at head). At each step: save next, flip curr.next to point to prev, advance both prev and curr. When curr is None, prev is the new head.',
+    codeQuality: [
+      'Three pointers with clear roles: prev (reversed chain), curr (current node), nxt (lookahead)',
+      'Order matters: save nxt BEFORE overwriting curr.next',
+      'Return `prev` — after the loop it\'s the last non-None node visited = new head',
+    ],
+    gettingUnstuck: [
+      'Draw it: 1→2→3 becomes None←1←2←3',
+      'You need to save curr.next before overwriting it — that\'s the key.',
+      'Trace one step: prev=None, curr=1, nxt=2 → 1.next=None, prev=1, curr=2',
+    ],
+    complexityBreakdown: 'Time O(n): one pass through the list. Space O(1): only three pointer variables — no recursion, no auxiliary structures.',
   },
   'merge-two-sorted-lists': {
     id: 'merge-two-sorted-lists', title: 'Merge Two Sorted Lists', number: 21,
@@ -904,6 +1348,23 @@ print(toL(mergeTwoLists(L([1,2,4]), L([1,3,4]))))  # [1,1,2,3,4,4]
 print(toL(mergeTwoLists(None, None)))                # []
 print(toL(mergeTwoLists(None, L([0]))))              # [0]`,
     time: 'O(n+m)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Can either list be empty? (yes — return the other)',
+      'Are the lists guaranteed sorted? (yes)',
+      'Should I create new nodes or merge in-place? (merge in-place — O(1) space)',
+    ],
+    approachWalkthrough: 'Use a dummy head node to avoid special-casing the first element. Compare heads of both lists and attach the smaller to result. Repeat until one list is exhausted, then attach the rest.',
+    codeQuality: [
+      'Dummy head pattern avoids special-casing the head of the result',
+      '`curr.next = l1 or l2` at the end — elegant way to attach the remaining list',
+      'No new nodes created — we reuse existing nodes by relinking pointers',
+    ],
+    gettingUnstuck: [
+      'Without dummy: you\'d need to special-case which list\'s head to use.',
+      'Dummy head unifies the first step with all subsequent steps.',
+      'Trace: l1=[1,2,4], l2=[1,3,4] → pick 1(l1), pick 1(l2), pick 2(l1)...',
+    ],
+    complexityBreakdown: 'Time O(n+m): each node is visited exactly once. Space O(1): no new nodes created; we relink existing pointers.',
   },
   'reorder-list': {
     id: 'reorder-list', title: 'Reorder List', number: 143,
@@ -958,6 +1419,23 @@ head2 = L([1,2,3,4,5])
 reorderList(head2)
 print(toL(head2))  # [1,5,2,4,3]`,
     time: 'O(n)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Should I modify in-place or create a new list? (modify in-place)',
+      'What\'s expected for a list of length 1 or 2?',
+      'Is the list guaranteed non-empty?',
+    ],
+    approachWalkthrough: 'Three distinct steps: find the middle with slow/fast pointers, reverse the second half in-place, then interleave the two halves. Each step is a standalone classic linked-list technique.',
+    codeQuality: [
+      'Clearly separate the three steps — don\'t merge them into one tangled loop',
+      'After finding mid, set `slow.next = None` to cleanly split the list in two',
+      'Interleaving: save both nexts before relinking to avoid losing pointers',
+    ],
+    gettingUnstuck: [
+      'State the three sub-problems: find middle, reverse second half, interleave.',
+      'Can you solve each independently? Yes — they\'re classic problems on their own.',
+      'Debug one step at a time: verify middle is correct before moving on.',
+    ],
+    complexityBreakdown: 'Time O(n): each of the three phases is O(n). Space O(1): all operations done in-place with pointer manipulation.',
   },
   'remove-nth-from-end': {
     id: 'remove-nth-from-end', title: 'Remove Nth Node From End of List', number: 19,
@@ -995,6 +1473,23 @@ print(toL(removeNthFromEnd(L([1,2,3,4,5]), 2)))  # [1,2,3,5]
 print(toL(removeNthFromEnd(L([1]), 1)))           # []
 print(toL(removeNthFromEnd(L([1,2]), 1)))         # [1]`,
     time: 'O(n)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Is n always valid (1 ≤ n ≤ list length)? (yes, per constraints)',
+      'What if n equals the list length? (remove the head)',
+      'One pass required or is two passes acceptable?',
+    ],
+    approachWalkthrough: 'Dummy head and two pointers with a gap of n+1. Advance fast by n+1 steps first. Then move both together until fast is None — at that point slow.next is the node to remove.',
+    codeQuality: [
+      'Dummy head simplifies removing the actual head node (when n = list length)',
+      'Advance fast by n+1 (not n) so slow ends at the PREDECESSOR of the target',
+      'One pass — no need to count the list length first',
+    ],
+    gettingUnstuck: [
+      'Why n+1 steps? We want slow to land at the node BEFORE the one to remove.',
+      'Trace: list=1→2→3→4→5, n=2. fast advances 3 steps to node 3. Both move: fast reaches end, slow at node 3. Remove node 4.',
+      'Dummy head handles the edge case of removing the head node cleanly.',
+    ],
+    complexityBreakdown: 'Time O(n): fast traverses the whole list once. Space O(1): two pointer variables, no extra data structures.',
   },
   'linked-list-cycle': {
     id: 'linked-list-cycle', title: 'Linked List Cycle', number: 141,
@@ -1028,6 +1523,23 @@ print(hasCycle(n1))  # False
 n3.next = n2
 print(hasCycle(n1))  # True`,
     time: 'O(n)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Should I just detect a cycle or also find where it starts? (just detect)',
+      'Can the list be empty? (return false)',
+      'Could the head itself be the cycle entry?',
+    ],
+    approachWalkthrough: 'Floyd\'s cycle detection: slow moves 1 step, fast moves 2 steps. If no cycle, fast reaches None. If there is a cycle, fast eventually laps slow and they meet inside the cycle.',
+    codeQuality: [
+      'Both start at head — clean initialization',
+      'Check `fast and fast.next` before advancing fast — avoids null pointer errors',
+      'Return True when `slow == fast` (same node object, not just same value)',
+    ],
+    gettingUnstuck: [
+      'Why does fast lap slow in a cycle? Each iteration the gap decreases by 1.',
+      'O(1) space: no visited set needed — Floyd\'s algorithm handles it.',
+      'Simpler alternative: visited set — O(n) space. State this as brute force.',
+    ],
+    complexityBreakdown: 'Time O(n): fast catches slow in at most the cycle length steps. Space O(1): two pointers only — the whole point of Floyd\'s is avoiding a visited set.',
   },
 
   // ─── TREES ────────────────────────────────────────────────────────────────
@@ -1074,6 +1586,23 @@ def level(root):
 print(level(invertTree(build([4,2,7,1,3,6,9]))))  # [4,7,2,9,6,3,1]
 print(level(invertTree(build([2,1,3]))))           # [2,3,1]`,
     time: 'O(n)', space: 'O(h) recursion stack',
+    clarifyingQuestions: [
+      'What does "invert" mean? (mirror — swap left and right at every node)',
+      'Should I modify in-place or return a new tree? (in-place, return root)',
+      'What\'s the result for a single node or empty tree?',
+    ],
+    approachWalkthrough: 'Recursive DFS. Base case: null → return None. Swap root.left and root.right using Python tuple swap. Then recursively invert both children.',
+    codeQuality: [
+      'Tuple swap: `root.left, root.right = root.right, root.left` — atomic and readable',
+      'Recursion handles the rest — no need to track depth or use an explicit stack',
+      'Return root at the end — caller needs the unchanged root reference',
+    ],
+    gettingUnstuck: [
+      'Think: invert tree = swap children at root, then invert each subtree.',
+      'Trust the recursion — if inverting subtrees works, swapping and delegating is the full solution.',
+      'Can also do iteratively with a queue (BFS) — swap children as you visit each node.',
+    ],
+    complexityBreakdown: 'Time O(n): every node is visited exactly once. Space O(h): recursion stack depth equals tree height — O(log n) balanced, O(n) skewed.',
   },
   'max-depth-tree': {
     id: 'max-depth-tree', title: 'Maximum Depth of Binary Tree', number: 104,
@@ -1107,6 +1636,23 @@ print(maxDepth(build([3,9,20,None,None,15,7])))  # 3
 print(maxDepth(build([1,None,2])))               # 2
 print(maxDepth(None))                            # 0`,
     time: 'O(n)', space: 'O(h)',
+    clarifyingQuestions: [
+      'What does "depth" mean — nodes or edges? (nodes: a single-node tree has depth 1)',
+      'What\'s the depth of an empty tree? (0)',
+      'Is it a binary tree? (yes)',
+    ],
+    approachWalkthrough: 'Recursive: depth = 1 + max(depth of left subtree, depth of right subtree). Base case: null node returns 0. This single recursion captures everything.',
+    codeQuality: [
+      'Base case at the top: `if not root: return 0`',
+      'One-liner: `return 1 + max(maxDepth(root.left), maxDepth(root.right))`',
+      'Alternatively: BFS counting levels — same O(n) complexity, O(n) space',
+    ],
+    gettingUnstuck: [
+      'Think recursively: depth(tree) = 1 + max(depth(left), depth(right))',
+      'What\'s the depth of a leaf? 1 — both subtrees return 0.',
+      'Can I do it iteratively? Yes — BFS with level counting, or DFS with an explicit stack.',
+    ],
+    complexityBreakdown: 'Time O(n): every node is visited exactly once. Space O(h): recursion call stack — O(log n) balanced, O(n) completely skewed.',
   },
   'same-tree': {
     id: 'same-tree', title: 'Same Tree', number: 100,
@@ -1139,6 +1685,23 @@ print(isSameTree(build([1,2,3]), build([1,2,3])))    # True
 print(isSameTree(build([1,2]), build([1,None,2])))   # False
 print(isSameTree(build([1,2,1]), build([1,1,2])))    # False`,
     time: 'O(n)', space: 'O(h)',
+    clarifyingQuestions: [
+      'Does "same" mean structurally identical AND same values? (yes, both)',
+      'What if both trees are null? (true)',
+      'What if one is null and the other isn\'t? (false)',
+    ],
+    approachWalkthrough: 'Recursive. Handle base cases first: both null → true; one null → false; values differ → false. Then AND together the recursive results for left and right subtrees.',
+    codeQuality: [
+      'Handle all null cases before recursing — null checks first, value check second',
+      'Short-circuit `and` — if left subtrees differ, don\'t bother checking right',
+      'Clean one-liner return after base cases',
+    ],
+    gettingUnstuck: [
+      'Four cases at each node: both null, only one null, different values, same value.',
+      'The recursive structure mirrors the tree structure exactly.',
+      'Can also do iterative BFS/DFS with a stack of (p, q) pairs.',
+    ],
+    complexityBreakdown: 'Time O(n): visit every node in both trees — at most min(|p|, |q|) before a mismatch. Space O(h): recursion stack depth equals height of the shorter tree.',
   },
   'level-order-traversal': {
     id: 'level-order-traversal', title: 'Binary Tree Level Order Traversal', number: 102,
@@ -1182,6 +1745,23 @@ print(levelOrder(build([3,9,20,None,None,15,7])))  # [[3],[9,20],[15,7]]
 print(levelOrder(build([1])))                       # [[1]]
 print(levelOrder(None))                             # []`,
     time: 'O(n)', space: 'O(n)',
+    clarifyingQuestions: [
+      'Should each level be its own sublist? (yes)',
+      'What if the tree is null? (return [])',
+      'Is it a binary tree? (yes)',
+    ],
+    approachWalkthrough: 'BFS with a deque. I record the current queue length at the start of each outer iteration, then process exactly that many nodes — adding their children. This creates a clean level boundary.',
+    codeQuality: [
+      '`for _ in range(len(queue))` captures level size BEFORE processing — don\'t call len(queue) dynamically inside',
+      'Append to `level` per node, then append `level` to `result` after the inner loop',
+      '`deque` for O(1) popleft — `list.pop(0)` is O(n)',
+    ],
+    gettingUnstuck: [
+      'Key insight: how do you know when one level ends? Queue length at the start of each outer loop.',
+      'Add children to queue AFTER recording the current node — they\'re for the next level.',
+      'Alternative: track level with a counter or use two queues.',
+    ],
+    complexityBreakdown: 'Time O(n): each node is enqueued and dequeued exactly once. Space O(n): the queue holds at most the widest level — up to n/2 nodes in a complete binary tree.',
   },
   'validate-bst': {
     id: 'validate-bst', title: 'Validate Binary Search Tree', number: 98,
@@ -1214,6 +1794,23 @@ def build(vals):
 print(isValidBST(build([2,1,3])))         # True
 print(isValidBST(build([5,1,4,None,None,3,6])))  # False (4 in right but <5)`,
     time: 'O(n)', space: 'O(h)',
+    clarifyingQuestions: [
+      'Is the BST strict? (yes — strictly less/greater, no equal values)',
+      'What counts as invalid? Node value equal to a bound also fails.',
+      'What if the tree is null? (valid by definition)',
+    ],
+    approachWalkthrough: 'Pass valid min and max bounds recursively. Left child: max becomes parent val. Right child: min becomes parent val. Any node outside its bounds returns false immediately.',
+    codeQuality: [
+      'Defaults `-inf` and `+inf` for root — no special case at the top',
+      'Check `root.val <= min_val or root.val >= max_val` — strict inequality',
+      'Recurse with tightened bounds: left gets max_val=root.val, right gets min_val=root.val',
+    ],
+    gettingUnstuck: [
+      'Common mistake: only check against immediate parent. A right-subtree node must be greater than ALL ancestors.',
+      'Passing bounds down the recursion enforces the global constraint.',
+      'Alternative: inorder traversal should produce strictly increasing values.',
+    ],
+    complexityBreakdown: 'Time O(n): every node visited once. Space O(h): recursion stack — O(log n) balanced, O(n) skewed.',
   },
   'kth-smallest-bst': {
     id: 'kth-smallest-bst', title: 'Kth Smallest Element in a BST', number: 230,
@@ -1251,6 +1848,23 @@ def build(vals):
 print(kthSmallest(build([3,1,4,None,2]), 1))  # 1
 print(kthSmallest(build([5,3,6,2,4,None,None,1]), 3))  # 3`,
     time: 'O(h+k)', space: 'O(h)',
+    clarifyingQuestions: [
+      'Is k guaranteed valid (1 ≤ k ≤ node count)? (yes)',
+      'Is it 1-indexed or 0-indexed? (1-indexed)',
+      'Are there duplicate values? (no, BST values are unique)',
+    ],
+    approachWalkthrough: 'Iterative inorder traversal with a stack. Push all left children first (leftmost = smallest). Pop a node, decrement k — when k reaches 0, that\'s the answer. Then move to curr.right to continue inorder.',
+    codeQuality: [
+      'Iterative avoids O(n) recursion stack for a skewed tree',
+      'Inner `while curr` loop pushes the entire left spine',
+      'After popping, set `curr = curr.right` to continue inorder from there',
+    ],
+    gettingUnstuck: [
+      'Inorder traversal of a BST yields elements in sorted ascending order.',
+      'So: find the kth element of the inorder sequence.',
+      'Recursive version: pass k by reference using a list `[k]`',
+    ],
+    complexityBreakdown: 'Time O(h+k): traverse down to leftmost O(h), then visit k nodes. Space O(h): the explicit stack holds at most h nodes at any time.',
   },
   'lca-bst': {
     id: 'lca-bst', title: 'Lowest Common Ancestor of a BST', number: 235,
@@ -1289,6 +1903,23 @@ print(lowestCommonAncestor(root, p, q).val)  # 6
 p, q = TreeNode(2), TreeNode(4)
 print(lowestCommonAncestor(root, p, q).val)  # 2`,
     time: 'O(h)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Are p and q guaranteed to exist in the BST? (yes)',
+      'Can a node be its own ancestor? (yes — a node is an ancestor of itself)',
+      'Is it a valid BST? (yes — use the BST property)',
+    ],
+    approachWalkthrough: 'Walk down from root using BST property. If both p and q are less than current, go left. If both greater, go right. Otherwise (they split, or one equals current) the current node is the LCA.',
+    codeQuality: [
+      'No recursion needed — iterative walk is cleaner here',
+      'BST property makes this O(h) vs O(n) for a general binary tree',
+      'Three cases map directly to three if/elif/else branches',
+    ],
+    gettingUnstuck: [
+      'In a BST: if both nodes are in the same subtree, the LCA is also in that subtree.',
+      'When they "split" to different sides (or one equals current), current is the LCA.',
+      'This only works because it\'s a BST — general LCA is a harder problem.',
+    ],
+    complexityBreakdown: 'Time O(h): O(log n) balanced, O(n) skewed. Space O(1): iterative, no recursion stack.',
   },
   'binary-tree-max-path': {
     id: 'binary-tree-max-path', title: 'Binary Tree Maximum Path Sum', number: 124,
@@ -1326,6 +1957,23 @@ def build(vals):
 print(maxPathSum(build([1,2,3])))                     # 6
 print(maxPathSum(build([-10,9,20,None,None,15,7])))   # 42`,
     time: 'O(n)', space: 'O(h)',
+    clarifyingQuestions: [
+      'Can the path contain negative values? (yes — clamp with max(0, gain))',
+      'Does the path have to pass through root? (no)',
+      'Can the tree have a single node? (yes — that node\'s value is the answer)',
+    ],
+    approachWalkthrough: 'DFS post-order. At each node: max gain upward = node.val + max(0, left_gain, right_gain). Max path THROUGH this node = node.val + max(0,left) + max(0,right). Update global max with the through-path.',
+    codeQuality: [
+      'Use `max_sum = [float(\'-inf\')]` list to update across recursive calls',
+      'Clamp gains with `max(0, dfs(child))` — never extend through negative paths',
+      'Gain returned upward is single-branch; the full path (both branches) goes to global max',
+    ],
+    gettingUnstuck: [
+      'Separate two concerns: (1) best path THROUGH this node, (2) best gain passing UPWARD.',
+      'A path can "turn" at one node — can\'t go both left and right AND continue upward.',
+      'max(0, gain) prevents negative subtrees from dragging the sum down.',
+    ],
+    complexityBreakdown: 'Time O(n): every node visited exactly once in the DFS. Space O(h): recursion stack depth — O(log n) balanced, O(n) skewed.',
   },
 
   // ─── HEAP ─────────────────────────────────────────────────────────────────
@@ -1366,6 +2014,23 @@ print(mf.findMedian())  # 1.5
 mf.addNum(3)
 print(mf.findMedian())  # 2.0`,
     time: 'O(log n) add, O(1) median', space: 'O(n)',
+    clarifyingQuestions: [
+      'Can findMedian be called before any addNum? (no, per constraints)',
+      'Can numbers be negative? (yes)',
+      'What if there\'s only one number? (return that number)',
+    ],
+    approachWalkthrough: 'Two heaps: max-heap `small` for lower half, min-heap `large` for upper half. Always push to small first, then move small\'s max to large. Rebalance if sizes differ by more than 1. Median is at the boundary.',
+    codeQuality: [
+      'Python only has min-heap: negate values for max-heap behavior in `small`',
+      'After each insertion, ensure sizes differ by at most 1 and small.max ≤ large.min',
+      'findMedian: equal sizes → average both tops; unequal → top of larger heap',
+    ],
+    gettingUnstuck: [
+      'Two sorted halves: lower (max-heap) and upper (min-heap). Median is at the boundary.',
+      'After each insertion, rebalance so sizes differ by at most 1.',
+      'Also check ordering: top of small ≤ top of large — cross-push if violated.',
+    ],
+    complexityBreakdown: 'Time O(log n) per addNum: each heap operation is O(log n). O(1) for findMedian: just peek at heap tops. Space O(n): both heaps together hold all n elements.',
   },
   'merge-k-sorted-lists': {
     id: 'merge-k-sorted-lists', title: 'Merge K Sorted Lists', number: 23,
@@ -1408,6 +2073,23 @@ print(toL(mergeKLists([L([1,4,5]),L([1,3,4]),L([2,6])])))  # [1,1,2,3,4,4,5,6]
 print(toL(mergeKLists([])))                                  # []
 print(toL(mergeKLists([None])))                              # []`,
     time: 'O(n log k)', space: 'O(k)',
+    clarifyingQuestions: [
+      'Can k be 0 or any list be empty? (yes — handle gracefully)',
+      'Are lists guaranteed sorted? (yes)',
+      'Should I create a new list or merge in-place? (reuse existing nodes)',
+    ],
+    approachWalkthrough: 'Min-heap initialized with the first node of each non-null list. Each entry is (node.val, list_index, node) — list_index breaks ties. Repeatedly pop the minimum, attach to result, push its next node if it exists.',
+    codeQuality: [
+      'Include `list_index` in the tuple to avoid comparing ListNode objects on tie',
+      'Dummy head for clean result list construction',
+      'Only push `node.next` if it exists — no null pushes into the heap',
+    ],
+    gettingUnstuck: [
+      'Brute force: collect all values, sort, rebuild — O(n log n). Valid.',
+      'Optimization: we don\'t need to sort everything at once. We need the current global minimum.',
+      'Heap of k current heads gives O(log k) per extraction — O(n log k) total.',
+    ],
+    complexityBreakdown: 'Time O(n log k): n total nodes each pushed and popped once from a heap of size ≤ k. Space O(k): heap holds at most one node per list.',
   },
 
   // ─── BACKTRACKING ─────────────────────────────────────────────────────────
@@ -1440,6 +2122,24 @@ print(toL(mergeKLists([None])))                              # []`,
 print(combinationSum([2,3,5], 8))      # [[2,2,2,2],[2,3,3],[3,5]]
 print(combinationSum([2], 1))          # []`,
     time: 'O(2^(t/m))', space: 'O(t/m)',
+    clarifyingQuestions: [
+      'Can candidates contain duplicates? (no, per constraints)',
+      'Can I use the same candidate multiple times? (yes)',
+      'Are all candidates positive? (yes)',
+      'Is output order important? (any valid order per combination)',
+    ],
+    approachWalkthrough: 'Backtracking with index tracking. At each position: include candidates[i] and recurse at the same i (allowing reuse), or skip to i+1. Prune when total > target. Append a copy when total == target.',
+    codeQuality: [
+      'Pass index `i` — prevents revisiting earlier candidates and duplicate combos',
+      '`result.append(current[:])` — append a COPY, not the list reference',
+      '`current.pop()` to undo the last addition — classic backtrack undo step',
+    ],
+    gettingUnstuck: [
+      'Decision tree: at each position, include (stay at i, allowing reuse) or skip (advance to i+1).',
+      'Pruning: if total > target, stop — no need to go deeper.',
+      'Trace: [2,3,6,7], target=7 → 2,2,2 (sum=6), +2=8 prune, +3=7 ✓',
+    ],
+    complexityBreakdown: 'Time O(2^(t/m)): t=target, m=smallest candidate. Recursion depth is at most t/m and branches 2 ways. Space O(t/m): recursion stack depth.',
   },
   'word-search': {
     id: 'word-search', title: 'Word Search', number: 79,
@@ -1472,6 +2172,23 @@ print(exist(b1, "ABCCED"))  # True
 print(exist(b1, "SEE"))     # True
 print(exist(b1, "ABCB"))    # False`,
     time: 'O(m·n·4^L)', space: 'O(L)',
+    clarifyingQuestions: [
+      'Can a cell be reused in one path? (no — must track visited)',
+      'Can the word start anywhere in the grid? (yes)',
+      'Is an empty word valid? (return true by convention)',
+    ],
+    approachWalkthrough: 'For each cell matching word[0], run DFS. Mark current cell as "#" to flag visited, explore 4 directions, then restore the original char (backtrack). Return true as soon as the full word is matched.',
+    codeQuality: [
+      'In-place visited marking with "#" — avoids a separate visited matrix',
+      'Restore cell after recursion: `board[r][c] = tmp` — the backtrack step',
+      'Base case `if i == len(word): return True` at the top — clean early return',
+    ],
+    gettingUnstuck: [
+      'Brute force: DFS from every cell. That\'s the right approach — just needs backtracking.',
+      'Why mark visited? Prevent using the same cell twice in one path.',
+      'Why restore? Other starting cells need the original grid values.',
+    ],
+    complexityBreakdown: 'Time O(m·n·4^L): m×n cells as starting points, DFS explores up to 4^L paths per start (L=word length). Space O(L): recursion stack depth equals word length.',
   },
 
   // ─── GRAPHS ───────────────────────────────────────────────────────────────
@@ -1510,6 +2227,23 @@ grid2 = [["1","1","0","0","0"],
           ["0","0","0","1","1"]]
 print(numIslands(grid2))  # 3`,
     time: 'O(m·n)', space: 'O(m·n)',
+    clarifyingQuestions: [
+      'What counts as connected? (horizontal/vertical only — 4-directional)',
+      'Is modifying the grid allowed? (yes — we "sink" land to mark visited)',
+      'Can the grid be empty?',
+    ],
+    approachWalkthrough: 'Iterate every cell. When I find "1", increment count and DFS to sink all connected land by setting cells to "0". Each trigger of DFS from the outer loop represents one distinct island.',
+    codeQuality: [
+      'Sink cells to "0" in-place — avoids a separate visited set',
+      'DFS handles boundary checks and "already visited" at the start',
+      'Four directions as four separate recursive calls — simple and clear',
+    ],
+    gettingUnstuck: [
+      'This is connected component counting — DFS/BFS to mark each component.',
+      'Can also use Union-Find — slightly more complex but also O(m·n).',
+      'If modifying the grid is not allowed, use a separate `visited` set.',
+    ],
+    complexityBreakdown: 'Time O(m·n): each cell is visited at most twice — once in the outer loop, once during DFS. Space O(m·n): the recursive DFS stack can be m×n deep in the worst case (one big island).',
   },
   'clone-graph': {
     id: 'clone-graph', title: 'Clone Graph', number: 133,
@@ -1548,6 +2282,23 @@ print(clone.val)                           # 1
 print([n.val for n in clone.neighbors])    # [2, 4]
 print(clone is not n1)                     # True (deep copy)`,
     time: 'O(V+E)', space: 'O(V)',
+    clarifyingQuestions: [
+      'Is the graph guaranteed connected? (yes — reachable from the given node)',
+      'Can there be self-loops or parallel edges? (no, per constraints)',
+      'What if the input node is null? (return null)',
+    ],
+    approachWalkthrough: 'DFS with a hash map (original → clone). When I visit a node, I create its clone and store it immediately, then recursively clone all neighbors. The map prevents infinite loops on cycles.',
+    codeQuality: [
+      'Check `if n in old_to_new` first — handles cycles and prevents re-cloning',
+      'Create clone and add to map BEFORE recursing on neighbors — avoids infinite recursion',
+      'The map is both the visited set and the clone registry',
+    ],
+    gettingUnstuck: [
+      'Main challenge: cycles. Without the map you\'d recurse infinitely.',
+      'Create the clone immediately, add to map, THEN recurse neighbors.',
+      'Neighbors of the clone = clones of the original\'s neighbors.',
+    ],
+    complexityBreakdown: 'Time O(V+E): each node and edge visited exactly once. Space O(V): the hash map stores all V node clones.',
   },
   'course-schedule': {
     id: 'course-schedule', title: 'Course Schedule', number: 207,
@@ -1579,6 +2330,23 @@ print(clone is not n1)                     # True (deep copy)`,
 print(canFinish(2, [[1,0],[0,1]]))       # False (cycle: 0↔1)
 print(canFinish(5, [[1,0],[2,0],[3,1],[4,3]]))  # True`,
     time: 'O(V+E)', space: 'O(V+E)',
+    clarifyingQuestions: [
+      'Are there self-loops in prerequisites? (no, per constraints)',
+      'Do we need to produce a valid ordering or just check feasibility? (just check)',
+      'What if numCourses=1 with no prerequisites? (return true)',
+    ],
+    approachWalkthrough: 'Build adjacency list. DFS on each course using three states: 0 (unvisited), 1 (currently on path), 2 (fully done). If we reach a state-1 node, we found a cycle → false.',
+    codeQuality: [
+      'Three-state coloring is cleaner than a "visiting" set + "visited" set',
+      'Set state=1 before recursing, state=2 after all neighbors processed',
+      '`all(dfs(i) for ...)` handles disconnected components',
+    ],
+    gettingUnstuck: [
+      'This is cycle detection in a directed graph — course completion iff no cycle.',
+      'Why three states? "Visited" alone can\'t distinguish "on current path" from "already done".',
+      'Alternative: Kahn\'s BFS with in-degree counts — no three-state complexity.',
+    ],
+    complexityBreakdown: 'Time O(V+E): each course and prerequisite visited once. Space O(V+E): adjacency list plus recursion stack.',
   },
   'pacific-atlantic': {
     id: 'pacific-atlantic', title: 'Pacific Atlantic Water Flow', number: 417,
@@ -1615,6 +2383,23 @@ h = [[1,2,2,3,5],[3,2,3,4,4],[2,4,5,3,1],[6,7,1,4,5],[5,1,1,2,4]]
 result = sorted(pacificAtlantic(h))
 print(result)  # [[0,4],[1,3],[1,4],[2,2],[3,0],[3,1],[4,0]]`,
     time: 'O(m·n)', space: 'O(m·n)',
+    clarifyingQuestions: [
+      'Can water flow diagonally? (no — 4 directions only)',
+      'What does "can flow to both oceans" mean? (height decreases or stays equal along the path)',
+      'Can the grid be 1×1? (yes — flows to both oceans)',
+    ],
+    approachWalkthrough: 'Reverse BFS: start from ocean borders and expand inward where height is ≥ current (reverse of downhill flow). Two BFS passes — one per ocean. Cells in both reachable sets are the answer.',
+    codeQuality: [
+      'Multi-source BFS starting from all border cells simultaneously',
+      '`heights[nr][nc] >= heights[r][c]` is the reverse condition — water flows downhill TO the ocean',
+      'Set intersection `pacific & atlantic` is concise',
+    ],
+    gettingUnstuck: [
+      'Forward direction (from each cell) is O((mn)²) — too slow.',
+      'Reverse: start from ocean borders and work inward. Single BFS per ocean = O(mn).',
+      'Key reversal: "can flow TO ocean" → "can be REACHED from ocean border going uphill".',
+    ],
+    complexityBreakdown: 'Time O(m·n): two BFS passes, each visiting every cell at most once. Space O(m·n): two visited sets, each holding at most m×n entries.',
   },
 
   // ─── DYNAMIC PROGRAMMING ──────────────────────────────────────────────────
@@ -1641,6 +2426,23 @@ print(climbStairs(2))   # 2
 print(climbStairs(5))   # 8
 print(climbStairs(10))  # 89`,
     time: 'O(n)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Can I take more than 2 steps at once? (no — only 1 or 2)',
+      'Is n ≥ 1? (yes, per constraints)',
+      'What\'s expected for n=1? (1 way)',
+    ],
+    approachWalkthrough: 'dp[i] = dp[i-1] + dp[i-2] — this is Fibonacci! To reach step i I came from step i-1 (1 step) or step i-2 (2 steps). I only need the last two values, so I use two variables.',
+    codeQuality: [
+      'Space-optimize: tuple swap `prev2, prev1 = prev1, prev1 + prev2` — no temp variable',
+      'Handle n≤2 as a base case before the loop',
+      'Naming: `prev2` (two steps back) and `prev1` (one step back) over abstract a/b',
+    ],
+    gettingUnstuck: [
+      'Define subproblem: ways(n) = ways(n-1) + ways(n-2)',
+      'Base cases: ways(1)=1, ways(2)=2',
+      'This is Fibonacci — recognize and name the pattern in the interview.',
+    ],
+    complexityBreakdown: 'Time O(n): one loop from 3 to n. Space O(1): only two scalar variables — no DP array.',
   },
   'house-robber': {
     id: 'house-robber', title: 'House Robber', number: 198,
@@ -1664,6 +2466,23 @@ print(climbStairs(10))  # 89`,
 print(rob([2,7,9,3,1]))    # 12 (rob 2,9,1)
 print(rob([2,1,1,2]))      # 4`,
     time: 'O(n)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Can I rob the first AND last house? (yes — they\'re not adjacent unless n=2)',
+      'Can the array be empty? (return 0)',
+      'Are all values non-negative? (yes)',
+    ],
+    approachWalkthrough: 'At each house: either rob it (prev2 + nums[i]) or skip it (prev1). Take the max. I only need two running variables — no full array.',
+    codeQuality: [
+      'Space-optimize: `prev2, prev1 = prev1, max(prev1, prev2 + n)` — one-liner update',
+      'Initialize both to 0 — no houses = 0 profit',
+      'Reasoning is clear: rob = skip one before; skip = keep running max',
+    ],
+    gettingUnstuck: [
+      'Subproblem: max_rob(i) = max amount robbing houses 0..i',
+      'Recurrence: max_rob(i) = max(nums[i] + max_rob(i-2), max_rob(i-1))',
+      'Can\'t rob adjacent houses — this constraint directly drives the recurrence.',
+    ],
+    complexityBreakdown: 'Time O(n): one pass through nums. Space O(1): two scalar variables.',
   },
   'coin-change': {
     id: 'coin-change', title: 'Coin Change', number: 322,
@@ -1689,6 +2508,24 @@ print(rob([2,1,1,2]))      # 4`,
 print(coinChange([2], 3))           # -1 (impossible)
 print(coinChange([1], 0))           # 0`,
     time: 'O(amount × coins)', space: 'O(amount)',
+    clarifyingQuestions: [
+      'Can coins be reused? (yes — unlimited supply)',
+      'Can amount be 0? (return 0)',
+      'Can the amount be unreachable? (return -1)',
+      'Are coin values always positive? (yes)',
+    ],
+    approachWalkthrough: 'Bottom-up DP. dp[0]=0, dp[1..amount]=infinity. For each amount from 1 to amount, try every coin: dp[i] = min(dp[i], dp[i-coin]+1). Return dp[amount] or -1 if infinity.',
+    codeQuality: [
+      'Initialize with `float(\'inf\')` — any real answer will be smaller; signals unreachable',
+      'Only try coin if `coin <= i` — can\'t use a coin larger than the current amount',
+      'Final check: `dp[amount] if dp[amount] != float(\'inf\') else -1`',
+    ],
+    gettingUnstuck: [
+      'Subproblem: what\'s the fewest coins to make amount i?',
+      'For each coin: if it fits, dp[i] = min(dp[i], dp[i-coin] + 1)',
+      'Build up from small amounts to the target — each solution reuses smaller solutions.',
+    ],
+    complexityBreakdown: 'Time O(amount × coins): outer loop over amount, inner loop over all coins. Space O(amount): the DP array.',
   },
   'longest-increasing-subsequence': {
     id: 'longest-increasing-subsequence', title: 'Longest Increasing Subsequence', number: 300,
@@ -1713,6 +2550,23 @@ print(coinChange([1], 0))           # 0`,
 print(lengthOfLIS([0,1,0,3,2,3]))           # 4
 print(lengthOfLIS([7,7,7,7,7]))             # 1`,
     time: 'O(n²)', space: 'O(n)',
+    clarifyingQuestions: [
+      'Strictly increasing or non-decreasing? (strictly increasing)',
+      'Does the subsequence have to be contiguous? (no — it\'s a subsequence, not a subarray)',
+      'Can the array be empty? (return 0)',
+    ],
+    approachWalkthrough: 'dp[i] = length of LIS ending at index i. Start all dp[i]=1 (each element alone is a length-1 subsequence). For each i, look back at all j<i where nums[j]<nums[i]: dp[i] = max(dp[i], dp[j]+1). Answer is max(dp).',
+    codeQuality: [
+      'Initialize all dp to 1 — base case: every element is an LIS of length 1',
+      'Double loop is O(n²) — fine for Blind 75 constraints',
+      'Mention O(n log n) patience sorting as a follow-up optimization',
+    ],
+    gettingUnstuck: [
+      'Define the subproblem clearly: LIS ENDING AT i (not starting at i).',
+      'Transition: for each j<i where nums[j]<nums[i], we can extend j\'s subsequence.',
+      'Answer is max over all dp[i] — the LIS might end at any position.',
+    ],
+    complexityBreakdown: 'Time O(n²): nested loops — for each of n positions, look back at all previous ones. Space O(n): the dp array.',
   },
   'word-break': {
     id: 'word-break', title: 'Word Break', number: 139,
@@ -1739,6 +2593,23 @@ print(lengthOfLIS([7,7,7,7,7]))             # 1`,
 print(wordBreak("applepenapple", ["apple","pen"]))   # True
 print(wordBreak("catsandog", ["cats","dog","sand","and","cat"]))  # False`,
     time: 'O(n²)', space: 'O(n)',
+    clarifyingQuestions: [
+      'Can words in the dictionary be reused? (yes)',
+      'Can s be empty? (return true — empty string is trivially segmentable)',
+      'Can the dictionary be empty? (return false unless s is empty)',
+    ],
+    approachWalkthrough: 'dp[i] = true if s[0..i-1] can be segmented. dp[0]=true. For each position i, check all j<i: if dp[j] is true and s[j:i] is in the word set, set dp[i]=true. Convert wordDict to a set first for O(1) lookups.',
+    codeQuality: [
+      'Convert to set first: `word_set = set(wordDict)` — O(1) lookups in the inner loop',
+      '`break` after finding dp[i]=True — no need to check other splits',
+      'dp[0]=True is the base case: empty prefix is always segmentable',
+    ],
+    gettingUnstuck: [
+      'Subproblem: can I segment the first i characters?',
+      'dp[i] = true if there\'s a split point j where dp[j]=true AND s[j:i] is a word.',
+      'Think backwards: "what word could end at position i?"',
+    ],
+    complexityBreakdown: 'Time O(n²): outer loop over n positions, inner loop over n split points; each substring check is O(n) but break early. Space O(n): dp array plus the word set.',
   },
 
   // ─── INTERVALS ────────────────────────────────────────────────────────────
@@ -1766,6 +2637,23 @@ print(wordBreak("catsandog", ["cats","dog","sand","and","cat"]))  # False`,
 print(merge([[1,4],[4,5]]))                 # [[1,5]]
 print(merge([[1,4],[0,4]]))                 # [[0,4]]`,
     time: 'O(n log n)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Are intervals guaranteed sorted? (no — must sort first)',
+      'Can intervals be a single point [a,a]? (yes)',
+      'What if there\'s only one interval? (return it unchanged)',
+    ],
+    approachWalkthrough: 'Sort by start time. Initialize result with the first interval. For each subsequent interval: if it overlaps the last in result (curr.start ≤ result[-1].end), extend the end. Otherwise append a new interval.',
+    codeQuality: [
+      'Sort in-place: `intervals.sort(key=lambda x: x[0])`',
+      '`result[-1][1] = max(result[-1][1], end)` — extend the end if the new interval goes further',
+      'Overlap condition: `start <= result[-1][1]` — not `<`, handles touching intervals',
+    ],
+    gettingUnstuck: [
+      'Without sorting: you\'d need to check every pair — O(n²).',
+      'Sorted by start: the only possible overlap is with the LAST merged interval.',
+      'Two cases: overlap → extend end; no overlap → append new interval.',
+    ],
+    complexityBreakdown: 'Time O(n log n): dominated by sorting; the merge scan is O(n). Space O(1) excluding output: sort is in-place.',
   },
   'insert-interval': {
     id: 'insert-interval', title: 'Insert Interval', number: 57,
@@ -1794,6 +2682,23 @@ print(merge([[1,4],[0,4]]))                 # [[0,4]]`,
     testCode: `print(insert([[1,3],[6,9]], [2,5]))               # [[1,5],[6,9]]
 print(insert([[1,2],[3,5],[6,7],[8,10],[12,16]], [4,8]))  # [[1,2],[3,10],[12,16]]`,
     time: 'O(n)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Is the list already sorted and non-overlapping? (yes, per problem)',
+      'Can newInterval overlap multiple existing intervals? (yes)',
+      'Can newInterval come before all existing intervals? (yes)',
+    ],
+    approachWalkthrough: 'Three phases: (1) collect intervals ending before newInterval starts, (2) merge all overlapping intervals into newInterval by expanding its bounds, (3) append newInterval, then remaining intervals. No sorting needed.',
+    codeQuality: [
+      'Phase separation is the key: before, overlap, after — clear linear scan',
+      'Merge by expanding: `min(new[0], curr[0])` and `max(new[1], curr[1])`',
+      '`result.extend(intervals[i:])` appends remaining tail efficiently',
+    ],
+    gettingUnstuck: [
+      'Draw the three regions: [before newInterval] [overlapping region] [after newInterval]',
+      'Overlap condition: `intervals[i][0] <= newInterval[1]` — current starts before new ends',
+      'Merge: expand newInterval to cover all overlapping intervals, then insert once.',
+    ],
+    complexityBreakdown: 'Time O(n): one linear scan — each interval processed once. Space O(1) excluding output.',
   },
   'non-overlapping-intervals': {
     id: 'non-overlapping-intervals', title: 'Non-overlapping Intervals', number: 435,
@@ -1820,6 +2725,23 @@ print(insert([[1,2],[3,5],[6,7],[8,10],[12,16]], [4,8]))  # [[1,2],[3,10],[12,16
 print(eraseOverlapIntervals([[1,2],[1,2],[1,2]]))         # 2
 print(eraseOverlapIntervals([[1,2],[2,3]]))               # 0`,
     time: 'O(n log n)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Can I keep just one of overlapping intervals? (yes — that\'s the goal)',
+      'What should I minimize? (the number of intervals removed)',
+      'Are intervals sorted? (no — must sort first)',
+    ],
+    approachWalkthrough: 'Sort by end time. Track prevEnd. For each interval: if it overlaps (start < prevEnd), remove it (count++). Otherwise keep it and update prevEnd. Greedy: keep the interval ending earliest to leave maximum room.',
+    codeQuality: [
+      'Sort by END time (not start) — greedy: keep the interval ending earliest',
+      'When overlapping: count++ and keep prevEnd unchanged (removing the later-ending current)',
+      'When no overlap: update prevEnd to current end',
+    ],
+    gettingUnstuck: [
+      'Equivalent: find MAX non-overlapping intervals, subtract from total.',
+      'Greedy: always keep the interval with smallest end time — leaves the most room.',
+      'This is the classic "Activity Selection" problem.',
+    ],
+    complexityBreakdown: 'Time O(n log n): sorting dominates; the scan is O(n). Space O(1): only prevEnd and count variables.',
   },
 
   // ─── BIT MANIPULATION ─────────────────────────────────────────────────────
@@ -1844,6 +2766,23 @@ print(eraseOverlapIntervals([[1,2],[2,3]]))               # 0`,
 print(hammingWeight(128))         # 1  (10000000)
 print(hammingWeight(2147483645))  # 30`,
     time: 'O(log n)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Is n treated as a 32-bit unsigned integer? (yes, per problem)',
+      'What\'s the range of n? (0 to 2³² - 1)',
+      'Should I handle n=0? (yes — return 0)',
+    ],
+    approachWalkthrough: 'Use the bit trick n & (n-1) which clears the lowest set bit. Count how many times I can apply this before n becomes 0. Each operation removes exactly one "1" bit.',
+    codeQuality: [
+      '`n &= n - 1` is the canonical "clear lowest set bit" idiom — name it in the interview',
+      'Count increments once per operation = once per set bit',
+      'Alternative: `bin(n).count("1")` in Python — mention but explain the bit trick',
+    ],
+    gettingUnstuck: [
+      'What does n & (n-1) do? It clears the rightmost 1-bit. Why? n-1 flips all bits from the rightmost 1 downward.',
+      'Alternative: right-shift n by 1 each time, check if LSB is 1 — O(32).',
+      'This approach only iterates as many times as there are 1-bits — faster for sparse values.',
+    ],
+    complexityBreakdown: 'Time O(log n): at most 32 iterations for a 32-bit integer. More precisely O(k) where k is the number of set bits. Space O(1): just the count variable.',
   },
   'counting-bits': {
     id: 'counting-bits', title: 'Counting Bits', number: 338,
@@ -1864,6 +2803,23 @@ print(hammingWeight(2147483645))  # 30`,
     testCode: `print(countBits(2))   # [0,1,1]
 print(countBits(5))   # [0,1,1,2,1,2]`,
     time: 'O(n)', space: 'O(1) excluding output',
+    clarifyingQuestions: [
+      'Is the output 0-indexed? (yes — ans[i] for i from 0 to n)',
+      'Can n be 0? (yes — return [0])',
+      'Is O(n) required? (naive per-number approach is O(n log n)',
+    ],
+    approachWalkthrough: 'DP: dp[i] = dp[i >> 1] + (i & 1). Right-shifting i by 1 gives a smaller number whose bit count we already computed. We add 1 if the last bit of i is set.',
+    codeQuality: [
+      '`dp[i >> 1]` is dp[i//2] — bit count of i without its last bit',
+      '`(i & 1)` is 1 if i is odd, 0 if even — the last bit',
+      'The recurrence mirrors the bit structure — compact and expressive',
+    ],
+    gettingUnstuck: [
+      'Naive: count bits for each number separately — O(n log n).',
+      'Notice: every number i = i>>1 (already computed) plus its last bit.',
+      'This is "reuse previous DP results" — a classic insight.',
+    ],
+    complexityBreakdown: 'Time O(n): one pass from 1 to n, each step O(1). Space O(1) excluding the output array.',
   },
   'reverse-bits': {
     id: 'reverse-bits', title: 'Reverse Bits', number: 190,
@@ -1887,6 +2843,23 @@ print(reverseBits(43261596))   # 964176192
 # 4294967293 = 11111111111111111111111111111101
 print(reverseBits(4294967293)) # 3221225471`,
     time: 'O(1)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Is it exactly 32 bits? (yes — always reverse all 32 positions)',
+      'Is n treated as unsigned? (yes)',
+      'Does Python\'s arbitrary precision need handling? (mask with 0xFFFFFFFF if needed)',
+    ],
+    approachWalkthrough: 'Loop 32 times. Each iteration: shift result left by 1 (making room), OR with the last bit of n, then right-shift n by 1 to expose the next bit. After 32 steps, result holds the bit-reversed value.',
+    codeQuality: [
+      '`result = (result << 1) | (n & 1)` reads as: "shift result, add current bit of n"',
+      '`n >>= 1` exposes the next bit of n',
+      'Loop exactly 32 times — handles leading zeros in n correctly',
+    ],
+    gettingUnstuck: [
+      'Process n one bit at a time from LSB to MSB. Build result from LSB to MSB of the reversed number.',
+      'Bit by bit: extract last bit of n, put it as the next bit of result.',
+      'After 32 iterations, each bit of n has moved to its mirror position.',
+    ],
+    complexityBreakdown: 'Time O(1): exactly 32 iterations regardless of input. Space O(1): just result and the loop counter.',
   },
   'missing-number': {
     id: 'missing-number', title: 'Missing Number', number: 268,
@@ -1906,6 +2879,23 @@ print(reverseBits(4294967293)) # 3221225471`,
 print(missingNumber([0,1]))      # 2
 print(missingNumber([9,6,4,2,3,5,7,0,1]))  # 8`,
     time: 'O(n)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Is exactly one number missing? (yes)',
+      'Are values in range [0, n] where n = len(nums)? (yes)',
+      'Can there be duplicates? (no — exactly n distinct numbers from 0 to n with one missing)',
+    ],
+    approachWalkthrough: 'XOR all numbers from 0 to n with all values in the array. Each number that appears in both cancels out (x ^ x = 0). The missing number appears only once — it\'s what remains.',
+    codeQuality: [
+      'Start `result = len(nums)` then XOR with each index and value — one loop handles everything',
+      'Alternative: math — expected sum minus actual sum. Simpler but less "bit manipulation".',
+      'The XOR version is O(1) space and handles all edge cases naturally',
+    ],
+    gettingUnstuck: [
+      'XOR property: x ^ x = 0, x ^ 0 = x. Pairs cancel, unpaired value remains.',
+      'XOR all indices 0..n with all array values. Everything cancels except the missing number.',
+      'Alternative: Gauss formula sum(0..n) = n*(n+1)/2. Subtract actual sum.',
+    ],
+    complexityBreakdown: 'Time O(n): one pass through the array, O(1) work per element. Space O(1): just the result variable.',
   },
   'sum-of-two-integers': {
     id: 'sum-of-two-integers', title: 'Sum of Two Integers', number: 371,
@@ -1927,6 +2917,23 @@ print(missingNumber([9,6,4,2,3,5,7,0,1]))  # 8`,
 print(getSum(2, 3))    # 5
 print(getSum(-1, 1))   # 0`,
     time: 'O(1)', space: 'O(1)',
+    clarifyingQuestions: [
+      'Can a or b be negative? (yes)',
+      'Are there any size constraints? (32-bit integers)',
+      'Specifically cannot use + or -? (correct — bitwise ops only)',
+    ],
+    approachWalkthrough: 'XOR gives the sum without carry. AND gives carry bits — shift left by 1 to put carry in the right position. Repeat until carry is 0. In Python, mask to 32 bits to handle arbitrary precision.',
+    codeQuality: [
+      '`a ^ b` — bits that differ: where the sum bits land (without carry)',
+      '`(a & b) << 1` — bits where both are 1 produce a carry one position higher',
+      'Mask `0xFFFFFFFF` to keep within 32-bit bounds in Python',
+    ],
+    gettingUnstuck: [
+      'Binary addition: sum bit = XOR, carry bit = AND shifted left.',
+      'Each iteration propagates the carry one position higher.',
+      'Terminates when carry = 0 — addition is complete.',
+    ],
+    complexityBreakdown: 'Time O(1): at most 32 iterations for 32-bit integers. Space O(1): just a, b, and carry variables.',
   },
 };
 
