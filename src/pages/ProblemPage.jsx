@@ -27,9 +27,11 @@ export default function ProblemPage() {
         <h1>{p.title}</h1>
         <div className="problem-meta">
           <span className={`badge ${p.difficulty}`}>{p.difficulty}</span>
-          <a href={`https://leetcode.com/problems/${id}/`} target="_blank" rel="noreferrer" className="lc-link">
-            LeetCode #{p.number} ↗
-          </a>
+          {p.number > 0 && (
+            <a href={`https://leetcode.com/problems/${id}/`} target="_blank" rel="noreferrer" className="lc-link">
+              LeetCode #{p.number} ↗
+            </a>
+          )}
           <span className="complexity-pill">Time: {p.time}</span>
           <span className="complexity-pill">Space: {p.space}</span>
         </div>

@@ -2935,10 +2935,88 @@ print(getSum(-1, 1))   # 0`,
     ],
     complexityBreakdown: 'Time O(1): at most 32 iterations for 32-bit integers. Space O(1): just a, b, and carry variables.',
   },
+
+  // ─── STRINGS ──────────────────────────────────────────────────────────────
+  'sort-sentence': {
+    id: 'sort-sentence', title: 'Sort the Sentence', number: 1859,
+    difficulty: 'Easy', category: 'arrays-hashing',
+    description: 'A shuffled sentence is given where each word has a trailing digit indicating its 1-indexed position. Reconstruct the original sentence.',
+    keyInsight: 'Split on spaces. The trailing digit of each word IS its position. Strip the digit, place the word at that index, join.',
+    approach: 'Split into tokens. For each token, the last character is the position (1-indexed). Strip it, insert the word at index pos-1. Join the sorted result.',
+    example: { input: '"is2 sentence4 This1 a3"', output: '"This is a sentence"', trace: [
+      { step: 'split', action: '["is2","sentence4","This1","a3"]', state: '' },
+      { step: 'extract positions', action: '"is"→2, "sentence"→4, "This"→1, "a"→3', state: '' },
+      { step: 'sort by position', action: '["This","is","a","sentence"]', state: 'join → result' },
+    ]},
+    solution: `def sortSentence(s):
+    words = s.split()
+    result = [''] * len(words)
+    for word in words:
+        result[int(word[-1]) - 1] = word[:-1]
+    return ' '.join(result)`,
+    testCode: `print(sortSentence("is2 sentence4 This1 a3"))   # "This is a sentence"
+print(sortSentence("Me2 Myself3 I1"))             # "I Me Myself"
+print(sortSentence("Myself1"))                    # "Myself"`,
+    time: 'O(n)', space: 'O(n)',
+    clarifyingQuestions: [
+      'Are positions guaranteed to be single digits? (yes — at most 9 words per constraints)',
+      'Can there be leading/trailing spaces? (no)',
+      'Is there always exactly one digit per word? (yes)',
+    ],
+    approachWalkthrough: 'I split the string on spaces. Each token ends with a digit that is its 1-based position. I strip the last character, use it as an index into a pre-sized result array, then join. No sorting needed — direct placement is O(n).',
+    codeQuality: [
+      '`word[-1]` extracts the position digit, `word[:-1]` strips it — clean slice syntax',
+      'Pre-size `result = [\'\'] * len(words)` so placement is O(1) per word',
+      'No sort step needed — we place directly by index',
+    ],
+    gettingUnstuck: [
+      'The digit at the end of each word is its destination index.',
+      'Could sort by the digit — O(n log n). Direct placement avoids that.',
+      'Careful: position is 1-indexed, array is 0-indexed — subtract 1.',
+    ],
+    complexityBreakdown: 'Time O(n): one pass to split, one pass to place each word by index. Space O(n): the result array holds all words.',
+  },
+  'sock-merchant': {
+    id: 'sock-merchant', title: 'Sales by Match (Sock Merchant)', number: 0,
+    difficulty: 'Easy', category: 'arrays-hashing',
+    description: 'Given an array of integers representing sock colors, return the number of matching pairs. (HackerRank: Sales by Match)',
+    keyInsight: 'Count the frequency of each color. Each color contributes count // 2 pairs.',
+    approach: 'Build a frequency map. For each color, pairs += freq // 2. Sum all pairs.',
+    example: { input: 'ar=[10,20,20,10,10,30,50,10,20]', output: '3', trace: [
+      { step: 'count', action: '{10:4, 20:3, 30:1, 50:1}', state: '' },
+      { step: 'pairs', action: '10→4//2=2, 20→3//2=1, 30→0, 50→0', state: '2+1=3 pairs' },
+    ]},
+    solution: `def sockMerchant(ar):
+    count = {}
+    for sock in ar:
+        count[sock] = count.get(sock, 0) + 1
+    return sum(freq // 2 for freq in count.values())`,
+    testCode: `print(sockMerchant([10,20,20,10,10,30,50,10,20]))  # 3
+print(sockMerchant([1,1,3,1,2,1,3,3,3,3]))          # 4
+print(sockMerchant([1,2,3,4]))                       # 0  (no pairs)`,
+    time: 'O(n)', space: 'O(n)',
+    clarifyingQuestions: [
+      'Can there be more than two of the same color? (yes — 4 socks of one color = 2 pairs)',
+      'Can the array be empty? (return 0)',
+      'Does order matter? (no)',
+    ],
+    approachWalkthrough: 'I count frequencies with a hash map in one pass. Then for each color, count // 2 gives the number of pairs. Sum those up. The key insight: odd counts just lose one sock, even counts pair perfectly.',
+    codeQuality: [
+      'One-liner return: `sum(freq // 2 for freq in count.values())`',
+      'Use `count.get(sock, 0) + 1` — avoids a key-exists check',
+      'Alternatively: use `collections.Counter(ar)` — even more concise',
+    ],
+    gettingUnstuck: [
+      'Brute force: sort and scan for adjacent equal elements — O(n log n).',
+      'Hash map: count frequencies in O(n), then tally pairs in O(k) where k = unique colors.',
+      'Any count ≥ 2 contributes pairs. count // 2 handles both even and odd counts correctly.',
+    ],
+    complexityBreakdown: 'Time O(n): one pass to build the frequency map, one pass over unique colors to tally pairs. Space O(n): the frequency map holds at most n entries.',
+  },
 };
 
 export const categoryProblems = {
-  'arrays-hashing': ['contains-duplicate','valid-anagram','two-sum','group-anagrams','top-k-frequent','product-except-self','longest-consecutive'],
+  'arrays-hashing': ['contains-duplicate','valid-anagram','two-sum','group-anagrams','top-k-frequent','product-except-self','longest-consecutive','sort-sentence','sock-merchant'],
   'two-pointers': ['valid-palindrome','three-sum','container-with-water','trapping-rain-water'],
   'sliding-window': ['best-time-stock','longest-substring-no-repeat','longest-repeating-replacement','minimum-window-substring'],
   'stack': ['valid-parentheses','min-stack','daily-temperatures','evaluate-rpn','generate-parentheses','largest-rectangle-histogram'],
