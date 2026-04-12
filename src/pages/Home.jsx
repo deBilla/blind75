@@ -1,0 +1,39 @@
+import { Link } from 'react-router-dom'
+import { categories } from '../data/blind75'
+
+export default function Home() {
+  const total = categories.reduce((s, c) => s + c.count, 0)
+
+  return (
+    <main className="home">
+      <div className="hero">
+        <h1>Blind 75 Visualized</h1>
+        <p>Every algorithm pattern explained visually. Step-by-step solutions with interactive traces.</p>
+        <div className="stats">
+          <div className="stat"><div className="num">{total}</div><div className="label">Problems</div></div>
+          <div className="stat"><div className="num">{categories.length}</div><div className="label">Categories</div></div>
+          <div className="stat"><div className="num">∞</div><div className="label">Visual Demos</div></div>
+        </div>
+      </div>
+
+      <div className="category-grid">
+        {categories.map(cat => (
+          <Link
+            key={cat.id}
+            to={`/category/${cat.id}`}
+            className="category-card"
+            style={{ '--card-color': cat.color }}
+          >
+            <div className="card-header">
+              <div className="card-icon">{cat.icon}</div>
+              <div className="card-count">{cat.count} problems</div>
+            </div>
+            <div className="card-name">{cat.name}</div>
+            <div className="card-tagline">{cat.tagline}</div>
+            <div className="card-concept">{cat.concept}</div>
+          </Link>
+        ))}
+      </div>
+    </main>
+  )
+}
