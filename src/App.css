@@ -421,6 +421,118 @@ pre { padding: 1.25rem; overflow-x: auto; font-family: 'JetBrains Mono', monospa
   color: #a78bfa;
 }
 
+/* ── Python Learning Section ──────────────────────────────────────────────── */
+
+/* Home page divider between Blind 75 and Python sections */
+.home-section-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 3rem 0 1.5rem;
+}
+.home-section-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.home-section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* Python banner on home */
+.py-home-banner {
+  background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(59,130,246,0.06));
+  border: 1px solid rgba(16,185,129,0.25);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.py-banner-left { display: flex; align-items: center; gap: 1rem; }
+.py-banner-icon { font-size: 2rem; }
+.py-banner-title { font-weight: 700; color: #fff; font-size: 1rem; margin-bottom: 0.25rem; }
+.py-banner-sub { font-size: 0.82rem; color: var(--muted); }
+.py-banner-btn {
+  background: rgba(16,185,129,0.15);
+  border: 1px solid rgba(16,185,129,0.35);
+  color: #10b981;
+  padding: 8px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.py-banner-btn:hover { background: rgba(16,185,129,0.25); }
+
+/* Level badge on Python category cards */
+.py-level-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+/* Topic count line at bottom of category card */
+.py-topic-count {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+/* Python home level progress bar */
+.py-level-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.85rem 1.25rem;
+}
+.py-legend-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.py-legend-end {
+  font-size: 0.72rem;
+  color: #10b981;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+}
+.py-level-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.py-level-fill {
+  height: 100%;
+  width: 80%;
+  background: linear-gradient(90deg, #10b981, #3b82f6);
+  border-radius: 3px;
+}
+
 @media (max-width: 768px) {
   .home, .category-page, .problem-page { padding: 1rem; }
   .hero h1 { font-size: 2rem; }
@@ -428,4 +540,5 @@ pre { padding: 1.25rem; overflow-x: auto; font-family: 'JetBrains Mono', monospa
   .problems-grid { grid-template-columns: 1fr; }
   .trace-header, .trace-row { grid-template-columns: 1fr 2fr; }
   .trace-header span:last-child, .trace-row span:last-child { display: none; }
+  .py-home-banner { flex-direction: column; align-items: flex-start; }
 }
