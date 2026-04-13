@@ -2941,40 +2941,45 @@ print(getSum(-1, 1))   # 0`,
     id: 'sort-sentence', title: 'Sort the Sentence', number: 1859,
     difficulty: 'Easy', category: 'arrays-hashing',
     description: 'A shuffled sentence is given where each word has a trailing digit indicating its 1-indexed position. Reconstruct the original sentence.',
-    keyInsight: 'Split on spaces. The trailing digit of each word IS its position. Strip the digit, place the word at that index, join.',
-    approach: 'Split into tokens. For each token, the last character is the position (1-indexed). Strip it, insert the word at index pos-1. Join the sorted result.',
-    example: { input: '"is2 sentence4 This1 a3"', output: '"This is a sentence"', trace: [
-      { step: 'split', action: '["is2","sentence4","This1","a3"]', state: '' },
-      { step: 'extract positions', action: '"is"→2, "sentence"→4, "This"→1, "a"→3', state: '' },
-      { step: 'sort by position', action: '["This","is","a","sentence"]', state: 'join → result' },
+    keyInsight: 'Split on spaces. All digit characters in a token form the position number; all alpha characters form the actual word. Place directly by index — no sort needed.',
+    approach: 'Split into tokens. For each token, extract all digits (joined) as the position and all letters as the word text. Place word at index pos-1 in a pre-sized result array. Join.',
+    example: { input: '"i2s T10his se4ntence a3"', output: '"This is sentence a"', trace: [
+      { step: 'split', action: '["i2s","T10his","se4ntence","a3"]', state: '' },
+      { step: '"i2s"', action: 'digits→"2" pos=2, letters→"is"', state: 'result[1]="is"' },
+      { step: '"T10his"', action: 'digits→"10" pos=10... wait n=4, pos=1, letters→"This"', state: 'result[0]="This"' },
     ]},
     solution: `def sortSentence(s):
     words = s.split()
     result = [''] * len(words)
     for word in words:
-        result[int(word[-1]) - 1] = word[:-1]
+        pos = int(''.join(c for c in word if c.isdigit()))
+        text = ''.join(c for c in word if c.isalpha())
+        result[pos - 1] = text
     return ' '.join(result)`,
-    testCode: `print(sortSentence("is2 sentence4 This1 a3"))   # "This is a sentence"
-print(sortSentence("Me2 Myself3 I1"))             # "I Me Myself"
-print(sortSentence("Myself1"))                    # "Myself"`,
+    testCode: `# digits at end (original form)
+print(sortSentence("is2 sentence4 This1 a3"))     # "This is a sentence"
+# digits anywhere, multi-digit positions
+print(sortSentence("M2e My3self I1"))              # "I Me Myself"
+print(sortSentence("w1o2rld He1l0o"))              # "Hello world"`,
     time: 'O(n)', space: 'O(n)',
     clarifyingQuestions: [
-      'Are positions guaranteed to be single digits? (yes — at most 9 words per constraints)',
-      'Can there be leading/trailing spaces? (no)',
-      'Is there always exactly one digit per word? (yes)',
+      'Can the position number be multi-digit? (yes — handle by joining all digit chars)',
+      'Can digits appear anywhere in the token, not just at the end? (yes)',
+      'Can there be leading/trailing spaces in the input? (no)',
+      'Is position always 1-indexed? (yes)',
     ],
-    approachWalkthrough: 'I split the string on spaces. Each token ends with a digit that is its 1-based position. I strip the last character, use it as an index into a pre-sized result array, then join. No sorting needed — direct placement is O(n).',
+    approachWalkthrough: 'Split on spaces. For each token, filter characters into two groups: digits (joined → int position) and letters (joined → word text). Place the word at result[pos-1]. Pre-sizing the result array means each placement is O(1). No sorting required.',
     codeQuality: [
-      '`word[-1]` extracts the position digit, `word[:-1]` strips it — clean slice syntax',
-      'Pre-size `result = [\'\'] * len(words)` so placement is O(1) per word',
-      'No sort step needed — we place directly by index',
+      '"".join(c for c in word if c.isdigit()) — collects ALL digit chars regardless of position',
+      '"".join(c for c in word if c.isalpha()) — strips all digits, leaving just the word',
+      'Pre-size result: [""] * len(words) so each placement is O(1) direct by index',
     ],
     gettingUnstuck: [
-      'The digit at the end of each word is its destination index.',
-      'Could sort by the digit — O(n log n). Direct placement avoids that.',
-      'Careful: position is 1-indexed, array is 0-indexed — subtract 1.',
+      'Clarify first: where can digits appear? Single vs multi-digit? This changes the approach.',
+      'If digits are always trailing and single: word[-1] for position, word[:-1] for text suffice.',
+      'General case: partition each char as digit or letter — join each group separately.',
     ],
-    complexityBreakdown: 'Time O(n): one pass to split, one pass to place each word by index. Space O(n): the result array holds all words.',
+    complexityBreakdown: 'Time O(n): one pass to split, then for each token one pass over its characters to partition digits and letters. Space O(n): the result array and character buffers are all proportional to input length.',
   },
   'sock-merchant': {
     id: 'sock-merchant', title: 'Sales by Match (Sock Merchant)', number: 0,
