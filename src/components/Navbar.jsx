@@ -4,9 +4,12 @@ export default function Navbar() {
   const loc = useLocation()
   const isHome = loc.pathname === '/'
   const isPython = loc.pathname.startsWith('/python')
+  const isGo = loc.pathname.startsWith('/go')
 
   const backLink = isPython && loc.pathname !== '/python'
     ? { to: '/python', label: '← Python Topics' }
+    : isGo && loc.pathname !== '/go'
+    ? { to: '/go', label: '← Go Topics' }
     : !isHome
     ? { to: '/', label: '← All Categories' }
     : null
@@ -32,6 +35,22 @@ export default function Navbar() {
           }}
         >
           🐍 Python
+        </Link>
+        <Link
+          to="/go"
+          style={{
+            fontSize: '0.82rem',
+            color: isGo ? '#00add8' : '#64748b',
+            textDecoration: 'none',
+            fontWeight: 500,
+            padding: '4px 10px',
+            borderRadius: 8,
+            background: isGo ? 'rgba(0,173,216,0.1)' : 'transparent',
+            border: isGo ? '1px solid rgba(0,173,216,0.25)' : '1px solid transparent',
+            transition: 'color 0.2s, background 0.2s',
+          }}
+        >
+          🐹 Go
         </Link>
       </div>
       {backLink && (

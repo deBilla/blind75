@@ -5,6 +5,9 @@ import ProblemPage from './pages/ProblemPage'
 import PythonHome from './pages/PythonHome'
 import PythonCategoryPage from './pages/PythonCategoryPage'
 import PythonTopicPage from './pages/PythonTopicPage'
+import GoHome from './pages/GoHome'
+import GoCategoryPage from './pages/GoCategoryPage'
+import GoTopicPage from './pages/GoTopicPage'
 import Navbar from './components/Navbar'
 
 export default function App() {
@@ -18,6 +21,9 @@ export default function App() {
         <Route path="/python" element={<PythonHome />} />
         <Route path="/python/:id" element={<PythonCategoryPage />} />
         <Route path="/python-topic/:id" element={<PythonTopicPage />} />
+        <Route path="/go" element={<GoHome />} />
+        <Route path="/go/:id" element={<GoCategoryPage />} />
+        <Route path="/go-topic/:id" element={<GoTopicPage />} />
       </Routes>
     </>
   )

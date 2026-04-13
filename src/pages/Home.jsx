@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { categories } from '../data/blind75'
 import { pythonCategories } from '../data/python'
+import { goCategories } from '../data/go'
 
 export default function Home() {
   const total = categories.reduce((s, c) => s + c.count, 0)
@@ -66,6 +67,47 @@ export default function Home() {
           >
             <div className="card-header">
               <div className="card-icon" style={{ fontFamily: 'JetBrains Mono', color: cat.color, fontSize: '0.95rem' }}>{cat.icon}</div>
+              <div className="py-level-badge" style={{ background: cat.color + '22', color: cat.color, border: `1px solid ${cat.color}44` }}>
+                Lvl {cat.level}
+              </div>
+            </div>
+            <div className="card-name">{cat.name}</div>
+            <div className="card-tagline">{cat.tagline}</div>
+            <div className="card-concept">{cat.concept}</div>
+          </Link>
+        ))}
+      </div>
+
+      {/* Go Learning Section */}
+      <div className="home-section-divider">
+        <div className="home-section-line" />
+        <span className="home-section-title">Go Learning</span>
+        <div className="home-section-line" />
+      </div>
+
+      <div className="py-home-banner go-banner">
+        <div className="py-banner-left">
+          <div className="py-banner-icon">🐹</div>
+          <div>
+            <div className="py-banner-title">Go — Zero Values to 10/10 Engineer</div>
+            <div className="py-banner-sub">
+              {goCategories.length} topic areas · Goroutines → Expert Patterns · Concurrency deep-dive
+            </div>
+          </div>
+        </div>
+        <Link to="/go" className="py-banner-btn go-banner-btn">Start Learning →</Link>
+      </div>
+
+      <div className="category-grid" style={{ marginTop: '1rem' }}>
+        {goCategories.map(cat => (
+          <Link
+            key={cat.id}
+            to={`/go/${cat.id}`}
+            className="category-card py-category-card"
+            style={{ '--card-color': cat.color }}
+          >
+            <div className="card-header">
+              <div className="card-icon" style={{ fontFamily: 'JetBrains Mono', color: cat.color, fontSize: '0.85rem' }}>{cat.icon}</div>
               <div className="py-level-badge" style={{ background: cat.color + '22', color: cat.color, border: `1px solid ${cat.color}44` }}>
                 Lvl {cat.level}
               </div>

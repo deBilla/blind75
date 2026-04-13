@@ -533,6 +533,20 @@ pre { padding: 1.25rem; overflow-x: auto; font-family: 'JetBrains Mono', monospa
   border-radius: 3px;
 }
 
+/* ── Go Learning Section ──────────────────────────────────────────────────── */
+
+.go-banner {
+  background: linear-gradient(135deg, rgba(0,173,216,0.08), rgba(93,201,226,0.06));
+  border-color: rgba(0,173,216,0.25);
+}
+
+.go-banner-btn {
+  background: rgba(0,173,216,0.15);
+  border: 1px solid rgba(0,173,216,0.35);
+  color: #00add8;
+}
+.go-banner-btn:hover { background: rgba(0,173,216,0.25); }
+
 @media (max-width: 768px) {
   .home, .category-page, .problem-page { padding: 1rem; }
   .hero h1 { font-size: 2rem; }

@@ -99,6 +99,26 @@ export const pythonCategories = [
     tagline: 'threading, asyncio, async/await, GIL',
     concept: 'Use asyncio for I/O-bound work (network, disk) and multiprocessing for CPU-bound work. Threading exists but the GIL limits true parallelism for CPU tasks. async/await is cooperative multitasking.',
   },
+  {
+    id: 'descriptors-metaclasses',
+    name: 'Descriptors & Metaclasses',
+    color: '#f43f5e',
+    bg: '#4c0519',
+    icon: '__',
+    level: '9 / 10',
+    tagline: 'The machinery behind @property and class creation',
+    concept: 'Descriptors power every attribute access in Python — @property, classmethod, staticmethod are all descriptors. Metaclasses let you intercept and customize class creation itself, enabling ORMs, plugin registries, and DSLs.',
+  },
+  {
+    id: 'performance-internals',
+    name: 'Performance & CPython Internals',
+    color: '#eab308',
+    bg: '#422006',
+    icon: 'perf',
+    level: '10 / 10',
+    tagline: '__slots__, profiling, GIL deep-dive, C extensions',
+    concept: 'At the top level you understand why CPython makes the tradeoffs it does. __slots__ cuts per-object memory 3–10×. cProfile + tracemalloc pin exactly where time and memory go. Knowing the C-layer lets you write extensions or call existing C libraries with ctypes.',
+  },
 ];
 
 export const pythonTopics = {
@@ -1596,17 +1616,525 @@ async def with_timeout():
       'Write an async producer/consumer using asyncio.Queue',
     ],
   },
+
+  // ─── DESCRIPTORS & METACLASSES ────────────────────────────────────────────
+  'descriptors': {
+    id: 'descriptors',
+    title: 'Descriptors',
+    category: 'descriptors-metaclasses',
+    level: 'Expert',
+    description: 'A descriptor is any object that defines __get__, __set__, or __delete__. They are the mechanism behind @property, classmethod, staticmethod, and every ORM field. Understanding them lets you build your own reusable attribute behaviour.',
+    keyInsight: 'Data descriptors (define __set__ or __delete__) take priority over instance __dict__. Non-data descriptors (only __get__) can be shadowed by instance attributes. This is why @property.setter works but you can override a cached_property.',
+    sections: [
+      {
+        title: 'The Descriptor Protocol',
+        explanation: '__get__(self, obj, objtype) is called when you read the attribute. obj is None when accessed on the class directly.',
+        code: `class Validator:
+    """Non-negative number descriptor."""
+
+    def __set_name__(self, owner, name):
+        # Called at class creation time — owner is the class, name is attr name
+        self.name = name
+        self.storage = f"_{name}"
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self          # accessed on class → return descriptor itself
+        return getattr(obj, self.storage, 0)
+
+    def __set__(self, obj, value):
+        if not isinstance(value, (int, float)):
+            raise TypeError(f"{self.name} must be a number")
+        if value < 0:
+            raise ValueError(f"{self.name} must be non-negative")
+        setattr(obj, self.storage, value)
+
+    def __delete__(self, obj):
+        delattr(obj, self.storage)
+
+class BankAccount:
+    balance = Validator()    # descriptor instance as class attribute
+    overdraft = Validator()
+
+    def __init__(self, balance):
+        self.balance = balance   # triggers Validator.__set__
+
+acc = BankAccount(100)
+acc.balance        # 100 — triggers Validator.__get__
+acc.balance = -5   # raises ValueError`,
+      },
+      {
+        title: 'How @property is a Descriptor',
+        explanation: 'property is a built-in data descriptor. You can recreate it from scratch to understand the mechanism.',
+        code: `# property recreated from scratch
+class myproperty:
+    def __init__(self, fget=None, fset=None, fdel=None, doc=None):
+        self.fget = fget
+        self.fset = fset
+        self.fdel = fdel
+        self.__doc__ = doc or (fget.__doc__ if fget else None)
+
+    def __set_name__(self, owner, name):
+        self.name = name
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        if self.fget is None:
+            raise AttributeError(f"unreadable attribute {self.name!r}")
+        return self.fget(obj)
+
+    def __set__(self, obj, value):
+        if self.fset is None:
+            raise AttributeError(f"can't set attribute {self.name!r}")
+        self.fset(obj, value)
+
+    def setter(self, fset):
+        return type(self)(self.fget, fset, self.fdel, self.__doc__)
+
+class Circle:
+    def __init__(self, radius):
+        self._radius = radius
+
+    @myproperty
+    def radius(self):
+        return self._radius
+
+    @radius.setter
+    def radius(self, value):
+        if value < 0: raise ValueError
+        self._radius = value`,
+      },
+      {
+        title: 'Lazy / Cached Descriptor',
+        explanation: 'A non-data descriptor that computes once then stores in instance __dict__ — shadowing itself on subsequent reads.',
+        code: `class lazy_property:
+    """Compute once, store on instance. O(1) after first access."""
+
+    def __init__(self, fn):
+        self.fn = fn
+        self.name = fn.__name__
+        self.__doc__ = fn.__doc__
+
+    def __set_name__(self, owner, name):
+        self.name = name
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        value = self.fn(obj)
+        # Store directly in instance __dict__ — shadows this descriptor
+        obj.__dict__[self.name] = value
+        return value
+
+class DataProcessor:
+    def __init__(self, data):
+        self.data = data
+
+    @lazy_property
+    def sorted_unique(self):
+        print("computing...")     # only prints once
+        return sorted(set(self.data))
+
+p = DataProcessor([3, 1, 4, 1, 5, 9, 2, 6])
+p.sorted_unique   # computing... → [1, 2, 3, 4, 5, 6, 9]
+p.sorted_unique   # cached — no computation
+# functtools.cached_property is exactly this pattern`,
+      },
+    ],
+    gotchas: [
+      'Data descriptors (with __set__) override instance __dict__ — you can\'t shadow them with self.attr = value',
+      '__set_name__ is called once at class creation time, NOT per instance — don\'t store instance state on the descriptor',
+      'Descriptors only work as class attributes — if you put them in __init__, they\'re just normal instance objects',
+      'Non-data descriptors can be shadowed — data descriptors cannot (this is why @property with only getter prevents setting)',
+    ],
+    practiceHints: [
+      'Write a TypeChecked descriptor that enforces a type on assignment',
+      'Build a Unit descriptor that stores values in a canonical unit but exposes them in any unit (km/miles)',
+      'Implement @lazy_property then compare it to functools.cached_property in the stdlib',
+    ],
+  },
+
+  'metaclasses': {
+    id: 'metaclasses',
+    title: 'Metaclasses',
+    category: 'descriptors-metaclasses',
+    level: 'Expert',
+    description: 'A metaclass is the class of a class. type is the default metaclass — it creates all classes. By subclassing type you intercept class creation: you can validate, transform, or register classes automatically at definition time.',
+    keyInsight: 'Metaclasses run at import time, not at instantiation. __init_subclass__ is the modern, simpler alternative for most use cases — reach for a full metaclass only when you need to intercept __new__ or control the class namespace itself.',
+    sections: [
+      {
+        title: 'type: The Root Metaclass',
+        explanation: 'type(name, bases, namespace) dynamically creates a class. Every class is an instance of type (or a subclass).',
+        code: `# Every class is created by type under the hood
+class Dog:
+    def bark(self): return "Woof"
+
+# Equivalent dynamic creation
+Dog = type('Dog', (), {'bark': lambda self: 'Woof'})
+
+type(Dog)          # <class 'type'>
+type(42)           # <class 'int'>
+type(int)          # <class 'type'>  — int's metaclass is type
+
+# type's three-argument form: type(name, bases, dict)
+Animal = type('Animal', (), {
+    'sound': 'generic',
+    'speak': lambda self: f"I say {self.sound}",
+})
+
+Cat = type('Cat', (Animal,), {'sound': 'Meow'})
+Cat().speak()   # "I say Meow"`,
+      },
+      {
+        title: 'Custom Metaclass',
+        explanation: 'Subclass type and override __new__ (before class object created) or __init__ (after). Use for ORMs, plugin registries, interface enforcement.',
+        code: `class RegistryMeta(type):
+    """Metaclass that auto-registers every subclass."""
+
+    def __init__(cls, name, bases, namespace):
+        super().__init__(name, bases, namespace)
+        # Don't register the base class itself
+        if not hasattr(cls, '_registry'):
+            cls._registry = {}
+        elif name != 'Plugin':   # skip abstract base
+            cls._registry[name] = cls
+
+class Plugin(metaclass=RegistryMeta):
+    """All subclasses are automatically registered."""
+    def run(self): raise NotImplementedError
+
+class CSVPlugin(Plugin):
+    def run(self): return "processing CSV"
+
+class JSONPlugin(Plugin):
+    def run(self): return "processing JSON"
+
+Plugin._registry
+# {'CSVPlugin': <class CSVPlugin>, 'JSONPlugin': <class JSONPlugin>}
+
+# Dynamically dispatch by name
+def run_plugin(name, *args):
+    cls = Plugin._registry[name]
+    return cls().run()`,
+      },
+      {
+        title: '__init_subclass__: The Modern Alternative',
+        explanation: 'For most use cases, __init_subclass__ is simpler than a full metaclass. It\'s a classmethod called on the base whenever a subclass is created.',
+        code: `class Validated:
+    """Require subclasses to define 'fields' class variable."""
+
+    def __init_subclass__(cls, strict=False, **kwargs):
+        super().__init_subclass__(**kwargs)
+        if not hasattr(cls, 'fields'):
+            raise TypeError(f"{cls.__name__} must define 'fields'")
+        if strict:
+            # Freeze the class — no new attributes at runtime
+            cls.__setattr__ = lambda self, k, v: (
+                (_ for _ in ()).throw(AttributeError(f"strict mode: {k}"))
+                if k not in cls.fields else object.__setattr__(self, k, v)
+            )
+        print(f"Registered: {cls.__name__} with fields={cls.fields}")
+
+class User(Validated, strict=False):
+    fields = ['name', 'email']
+
+class Product(Validated):
+    fields = ['sku', 'price', 'stock']
+
+# class BadModel(Validated): pass  → TypeError at class definition!
+
+# class decorators — another modern alternative to metaclasses
+import dataclasses
+
+@dataclasses.dataclass    # class decorator, not metaclass
+class Point:
+    x: float
+    y: float`,
+      },
+    ],
+    gotchas: [
+      'Metaclass conflicts: if two bases have different metaclasses, Python raises TypeError — you must create a combined metaclass',
+      '__init_subclass__ is called for ALL subclasses, including indirect ones — guard with hasattr checks',
+      'Metaclass __new__ receives the class namespace as an ordinary dict — order is preserved (Python 3.7+)',
+      'Avoid metaclasses when a class decorator or __init_subclass__ achieves the same result — simpler to understand',
+    ],
+    practiceHints: [
+      'Build a Singleton metaclass that ensures only one instance of any subclass exists',
+      'Use __init_subclass__ to enforce that every subclass defines a VERSION class variable',
+      'Implement an ORM-style Field descriptor + Model metaclass that collects field definitions',
+    ],
+  },
+
+  // ─── PERFORMANCE & INTERNALS ──────────────────────────────────────────────
+  'slots-memory': {
+    id: 'slots-memory',
+    title: '__slots__ & Memory Optimization',
+    category: 'performance-internals',
+    level: 'Expert',
+    description: 'By default every Python instance carries a __dict__ — a hash map that lets you set arbitrary attributes. __slots__ replaces it with a fixed C-level array, cutting per-object memory 3–10× and speeding up attribute access.',
+    keyInsight: '__slots__ is most valuable when you create millions of instances (e.g., nodes in a graph, records in a data pipeline). It also prevents typo bugs (no accidental new attributes). The trade-off: no __dict__, no weak references by default, inheritance is tricky.',
+    sections: [
+      {
+        title: '__slots__ Basics',
+        explanation: 'Declare __slots__ as a tuple/list of allowed attribute names. Python creates per-class descriptors for each slot instead of a per-instance dict.',
+        code: `import sys
+
+class WithDict:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+class WithSlots:
+    __slots__ = ('x', 'y')   # no __dict__ allocated
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+d = WithDict(1, 2)
+s = WithSlots(1, 2)
+
+sys.getsizeof(d)   # 48 bytes (just the object header)
+sys.getsizeof(s)   # 48 bytes (same header)
+# But the dict itself adds ~200 bytes:
+sys.getsizeof(d.__dict__)   # ~200 bytes
+# s has no __dict__ at all
+
+# Memory comparison at scale
+import tracemalloc
+tracemalloc.start()
+nodes_dict  = [WithDict(i, i) for i in range(100_000)]
+snap = tracemalloc.take_snapshot()
+# WithDict: ~28 MB  vs  WithSlots: ~8 MB
+
+# Can't add new attributes with __slots__
+s.z = 3   # AttributeError: z not in __slots__`,
+      },
+      {
+        title: 'weakref, __dict__ in slots, Inheritance',
+        explanation: 'To allow weak references, add "__weakref__" to __slots__. To allow arbitrary extra attributes on some instances, add "__dict__".',
+        code: `import weakref
+
+class Node:
+    __slots__ = ('val', 'next', '__weakref__')
+    def __init__(self, val):
+        self.val = val
+        self.next = None
+
+n = Node(42)
+ref = weakref.ref(n)   # works because __weakref__ is in slots
+ref()                  # Node
+
+# Adding __dict__ slot — best of both worlds
+class Flexible:
+    __slots__ = ('x', 'y', '__dict__')  # fixed slots + overflow dict
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+f = Flexible(1, 2)
+f.extra = "allowed"    # stored in __dict__
+f.x                    # stored in slot (fast)
+
+# Inheritance — parent slots NOT inherited automatically
+class Base:
+    __slots__ = ('a',)
+
+class Child(Base):
+    __slots__ = ('b',)   # must redeclare; don't repeat 'a'
+
+c = Child()
+c.a = 1    # works — from Base slot
+c.b = 2    # works — from Child slot`,
+      },
+      {
+        title: 'Profiling: Finding the Real Bottleneck',
+        explanation: 'Never optimize without measuring. cProfile finds hot functions, tracemalloc finds memory leaks, line_profiler zooms in on hot lines.',
+        code: `import cProfile
+import pstats
+
+# cProfile — function-level time profiling
+def slow():
+    return sum(i*i for i in range(10**6))
+
+pr = cProfile.Profile()
+pr.enable()
+slow()
+pr.disable()
+
+stats = pstats.Stats(pr)
+stats.sort_stats('cumulative')
+stats.print_stats(10)   # top 10 functions by cumulative time
+
+# tracemalloc — memory allocation tracking
+import tracemalloc
+
+tracemalloc.start()
+data = [dict(x=i) for i in range(100_000)]
+snapshot = tracemalloc.take_snapshot()
+top = snapshot.statistics('lineno')
+for stat in top[:5]:
+    print(stat)
+
+# sys.getsizeof — shallow size (doesn't include referenced objects)
+import sys
+lst = [0] * 1000
+sys.getsizeof(lst)          # 8056 — just the list shell + pointers
+# for deep size, use objgraph or recursive measure
+
+# timeit — accurate micro-benchmarking
+import timeit
+timeit.timeit('"-".join(str(n) for n in range(100))', number=10000)`,
+      },
+    ],
+    gotchas: [
+      '__slots__ in a child class does NOT remove __dict__ if the parent didn\'t use __slots__ — you must use it all the way up the chain',
+      'sys.getsizeof() is shallow — it does NOT count objects referenced inside the container',
+      'cProfile adds ~10–50% overhead — use it for relative comparisons, not absolute timing',
+      'tracemalloc traces allocation sites at snapshot time — take snapshots before and after to see the diff',
+    ],
+    practiceHints: [
+      'Benchmark WithDict vs WithSlots Point class creating 1M instances — measure with tracemalloc',
+      'Profile a slow function with cProfile and identify the top 3 hotspots',
+      'Use timeit to compare "".join(list) vs += string concatenation for 1000 iterations',
+    ],
+  },
+
+  'advanced-async': {
+    id: 'advanced-async',
+    title: 'Advanced Async & Internals',
+    category: 'performance-internals',
+    level: 'Expert',
+    description: 'Beyond basic asyncio: async generators, async context managers, TaskGroups (Python 3.11+), and understanding the event loop internals. Plus ctypes for calling C code without writing an extension.',
+    keyInsight: 'TaskGroup (Python 3.11+) is structured concurrency — all tasks in the group are cancelled if any one fails, and the group doesn\'t exit until all tasks finish. This eliminates the "fire and forget a task and lose its exception" footgun of bare asyncio.create_task.',
+    sections: [
+      {
+        title: 'Async Generators & Context Managers',
+        explanation: 'async def + yield = async generator. async def + __aenter__/__aexit__ = async context manager.',
+        code: `import asyncio
+
+# Async generator — yields values asynchronously
+async def ticker(delay, count):
+    for i in range(count):
+        await asyncio.sleep(delay)
+        yield i
+
+async def main():
+    async for tick in ticker(0.1, 5):
+        print(f"tick {tick}")
+
+# Async context manager via class
+class AsyncDB:
+    async def __aenter__(self):
+        self.conn = await connect()
+        return self.conn
+
+    async def __aexit__(self, *exc_info):
+        await self.conn.close()
+        return False   # don't suppress exceptions
+
+async def query():
+    async with AsyncDB() as conn:
+        return await conn.fetch("SELECT 1")
+
+# Async context manager via contextlib
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def managed_session():
+    session = await create_session()
+    try:
+        yield session
+    finally:
+        await session.close()`,
+      },
+      {
+        title: 'TaskGroup — Structured Concurrency (Python 3.11+)',
+        explanation: 'TaskGroup ensures all child tasks are awaited and their exceptions are propagated — no "lost" exceptions from fire-and-forget tasks.',
+        code: `import asyncio
+
+# OLD way — easy to lose exceptions
+async def old_style():
+    t1 = asyncio.create_task(fetch("url1"))
+    t2 = asyncio.create_task(fetch("url2"))
+    results = await asyncio.gather(t1, t2)
+    # If t1 raises, t2 is still running in the background!
+
+# NEW way — TaskGroup (Python 3.11+)
+async def new_style():
+    results = []
+    async with asyncio.TaskGroup() as tg:
+        t1 = tg.create_task(fetch("url1"))
+        t2 = tg.create_task(fetch("url2"))
+    # Both tasks are done here — exceptions propagated
+    results = [t1.result(), t2.result()]
+
+# ExceptionGroup — catches multiple exceptions at once (Python 3.11+)
+async def handle_errors():
+    try:
+        async with asyncio.TaskGroup() as tg:
+            tg.create_task(might_fail_a())
+            tg.create_task(might_fail_b())
+    except* ValueError as eg:
+        print(f"Value errors: {eg.exceptions}")
+    except* TypeError as eg:
+        print(f"Type errors: {eg.exceptions}")`,
+      },
+      {
+        title: 'ctypes — Call C Without Writing an Extension',
+        explanation: 'ctypes lets you call functions in shared C libraries (.so/.dll) directly from Python. No compilation needed.',
+        code: `import ctypes
+import ctypes.util
+
+# Load the standard C library
+libc = ctypes.CDLL(ctypes.util.find_library('c'))
+
+# Call strlen
+libc.strlen.argtypes = [ctypes.c_char_p]
+libc.strlen.restype  = ctypes.c_size_t
+libc.strlen(b"hello")   # 5
+
+# Call qsort
+arr = (ctypes.c_int * 5)(5, 3, 1, 4, 2)
+CMPFUNC = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p)
+def cmp(a, b):
+    return ctypes.cast(a, ctypes.POINTER(ctypes.c_int))[0] - \\
+           ctypes.cast(b, ctypes.POINTER(ctypes.c_int))[0]
+libc.qsort(arr, 5, ctypes.sizeof(ctypes.c_int), CMPFUNC(cmp))
+list(arr)   # [1, 2, 3, 4, 5]
+
+# Load a custom .so (e.g. compiled from mylib.c)
+# mylib = ctypes.CDLL("./mylib.so")
+# mylib.add.argtypes = [ctypes.c_int, ctypes.c_int]
+# mylib.add.restype = ctypes.c_int
+# mylib.add(3, 4)  → 7`,
+      },
+    ],
+    gotchas: [
+      'TaskGroup requires Python 3.11+ — use asyncio.gather(return_exceptions=True) + manual checking for older versions',
+      'async generators are not closed automatically if not fully consumed — use aclose() or async with aclosing(gen)',
+      'ctypes bypasses Python\'s type system entirely — wrong argtypes/restype causes segfaults, not exceptions',
+      'ExceptionGroup (except*) requires Python 3.11+ — catching it in older Python raises SyntaxError',
+    ],
+    practiceHints: [
+      'Write an async generator that streams chunks from a large file and processes them concurrently',
+      'Refactor a gather() call to use TaskGroup and verify exceptions are propagated correctly',
+      'Use ctypes to call the C math library\'s sin/cos and benchmark against Python\'s math.sin',
+    ],
+  },
 };
 
 export const pythonCategoryTopics = {
-  'foundations':           ['variables-types', 'control-flow'],
-  'collections':           ['lists-dicts-sets', 'comprehensions'],
-  'functions':             ['functions-scope'],
-  'oop':                   ['oop-classes'],
-  'error-handling':        ['error-handling'],
-  'iterators-generators':  ['iterators-generators'],
-  'decorators':            ['decorators'],
-  'standard-library':      ['standard-library'],
-  'type-hints':            ['type-hints'],
-  'concurrency':           ['concurrency'],
+  'foundations':                ['variables-types', 'control-flow'],
+  'collections':                ['lists-dicts-sets', 'comprehensions'],
+  'functions':                  ['functions-scope'],
+  'oop':                        ['oop-classes'],
+  'error-handling':             ['error-handling'],
+  'iterators-generators':       ['iterators-generators'],
+  'decorators':                 ['decorators'],
+  'standard-library':           ['standard-library'],
+  'type-hints':                 ['type-hints'],
+  'concurrency':                ['concurrency'],
+  'descriptors-metaclasses':    ['descriptors', 'metaclasses'],
+  'performance-internals':      ['slots-memory', 'advanced-async'],
 };
